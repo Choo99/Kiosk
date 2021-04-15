@@ -1,43 +1,51 @@
 package tcpKioskClient;
 
 import java.awt.BorderLayout;
-import java.awt.EventQueue;
+import java.awt.FlowLayout;
 
-import javax.imageio.ImageIO;
-import javax.swing.Icon;
+import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.border.EmptyBorder;
+import javax.swing.JSpinner;
+import javax.swing.JSpinner.DefaultEditor;
 import javax.swing.JLabel;
 import java.awt.Font;
 import java.awt.GridLayout;
-import java.awt.Image;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.SystemColor;
-import java.io.File;
-import java.io.IOException;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
 
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.border.LineBorder;
+import javax.swing.SpinnerModel;
+import javax.swing.SpinnerNumberModel;
+
+import kioskapp.itemproduct.ItemProduct;
+
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 public class KioskFrame extends JFrame {
 
 private static final long serialVersionUID = 1L;
 	private JTextField creditCardNo ;
-	
+	private static DecimalFormat format = new DecimalFormat("0.00");
 
 
 	// Private attribute for frame size setting
 	private int height =800;
 	private int width = 1000;
 	private JTable table;
-
+	private JPanel cartListPanel;
+	private int cartIndex = 0;
+	//private JPanel menuPanel;
+	//private JScrollPane menuScrollPanel;
 	
 	/**
 	 * Create the frame.
@@ -49,6 +57,11 @@ private static final long serialVersionUID = 1L;
 		this.setTitle("Kiosk Application");
 		this.setSize(width, height);
 		
+		cartListPanel = new JPanel(new GridLayout(10,1));
+		
+		//menuPanel = new JPanel(new BorderLayout());
+		
+		//menuScrollPanel = new JScrollPane();
 		
 		// Center the frame on the screen
         this.setLocationRelativeTo(null);		
@@ -56,7 +69,7 @@ private static final long serialVersionUID = 1L;
 		// Must close on X
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);		
 		
-		this.setResizable(false);
+		//this.setResizable(false);
 				
 		// Display component
 		loadComponent();
@@ -82,36 +95,14 @@ private static final long serialVersionUID = 1L;
             listLabel.setFont(font);	
 			//listLabel.setBounds(424, 11, 161, 39);
             listLabel.setHorizontalAlignment(JLabel.CENTER);
-            
-            ImageIcon icon = null;
-            JPanel list = null;
-            Image image;
-			try {
-				
-				image = ImageIO.read(new File("src/image/McChicken.png"));
-				Image newImage = image.getScaledInstance(100, 75, Image.SCALE_DEFAULT);
-				icon = new ImageIcon(newImage);
-				Object[][] rec2 = { 
-						{1, "McChicken",icon, 8.1},
-						{1, "McChicken",icon, 8.1},
-						{1, "McChicken",icon, 8.1},
-						{1, "McChicken",icon, 8.1},
-						{1, "McChicken",icon, 8.1},
-						{1, "McChicken",icon, 8.1},
-						{1, "McChicken",icon, 8.1},
-						{1, "McChicken",icon, 8.1},
-						{1, "McChicken",icon, 8.1},
-						{1, "McChicken",icon, 8.1},
-						{1, "McChicken",icon, 8.1},
-						{1, "McChicken",icon, 8.1},
-						{1, "McChicken",icon, 8.1},
-						{1, "McChicken",icon, 8.1}
-						};
-				list = setMenuList(rec2);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+
+            ListContent content = new ListContent();
+            ArrayList<ItemProduct> productList = new ArrayList<ItemProduct>();
+            ArrayList<ImageIcon> images = new ArrayList<ImageIcon>();
+            productList = content.setProductList();
+            images = content.setImages();
+			JPanel list = setMenuList(productList,images);
+
 			// Style the table
            
 				
@@ -147,55 +138,83 @@ private static final long serialVersionUID = 1L;
 			
 			// Add menu panel's components
 			menuPanel.add(BorderLayout.NORTH,listLabel);
-			JScrollPane panel = new JScrollPane(list);
-			//JPanel panel = new JPanel();
-			//panel.setPreferredSize(new Dimension(20,30));
-			menuPanel.add(BorderLayout.CENTER,panel);
+			JScrollPane menuScrollPanel = new JScrollPane(list);
+			menuPanel.add(BorderLayout.CENTER,menuScrollPanel);
 
 			return menuPanel;
 	}
 	
-	private JPanel setMenuList(Object[][] menuList) {
-		JPanel menu = new JPanel(new GridLayout(14,1));
-		for(int counter = 0;counter<13;counter++) {
-			JLabel noLabel = new JLabel(Integer.toString((int)menuList[counter][0]));
-			noLabel.setSize(100,200);
-			JLabel productLabel = new JLabel((String)menuList[counter][1]);
+	private JPanel setMenuList(ArrayList<ItemProduct> productList,ArrayList<ImageIcon> images) {
+		JPanel menu = new JPanel(new GridLayout(productList.size(),1));
+		
+		for(int counter = 0;counter<productList.size();counter++) {
+			ItemProduct itemProduct = productList.get(counter);
+			ImageIcon image = images.get(counter);
+			JLabel noLabel = new JLabel(Integer.toString(counter+1));
+			JLabel productLabel = new JLabel(itemProduct.getName());
 			JLabel productImgLabel = new JLabel();
-			productImgLabel.setIcon((ImageIcon)menuList[counter][2]);
-			JLabel productPriceLabel = new JLabel(Double.toString((double)menuList[counter][3]));
+			productImgLabel.setIcon(image);
+			JLabel productPriceLabel = new JLabel(format.format(itemProduct.getPrice()));
 			JButton addCartBtn = new JButton("Add Cart");
+			addCartBtn.setPreferredSize(new Dimension(100,40));	
+
+			JPanel btnPanel = new JPanel();
+			btnPanel.add(addCartBtn);
+			btnPanel.setPreferredSize(new Dimension(100,50));	
+			
 			JPanel panel = new JPanel();
+			//GridLayout layout = new GridLayout();
+			FlowLayout layout = new FlowLayout(FlowLayout.LEFT);
+			panel.setLayout(layout);
+
+			panel.add(Box.createRigidArea(new Dimension(3 - noLabel.getPreferredSize().width,0)));
 			panel.add(noLabel);
+			panel.add(Box.createRigidArea(new Dimension(300 - productLabel.getPreferredSize().width,0)));
 			panel.add(productLabel);
+			panel.add(Box.createRigidArea(new Dimension(200 - productImgLabel.getPreferredSize().width,0)));
 			panel.add(productImgLabel);
+			panel.add(Box.createRigidArea(new Dimension(200 - productPriceLabel.getPreferredSize().width,0)));
 			panel.add(productPriceLabel);
-			panel.add(addCartBtn);
+			panel.add(Box.createRigidArea(new Dimension(200 - btnPanel.getPreferredSize().width,0)));
+			panel.add(btnPanel);
 			menu.add(panel);
+			
+			KioskFrame frame = this;
+			addCartBtn.addActionListener(new ActionListener() {
+
+				public void actionPerformed(ActionEvent e) {
+					setCartListPanel(itemProduct,image,addCartBtn);
+					
+					frame.revalidate();
+					frame.repaint();
+				}
+				
+			});
 		}
 		return menu;
 	}
 
-	// To return chart panel
-	private JPanel getChartPanel(Font font)
+	// To return cart panel
+	private JPanel getCartPanel(Font font)
 	{
 
-		JPanel chartPanel = new JPanel();
-        
+		JPanel cartPanel = new JPanel(new BorderLayout());
+		cartPanel.setBackground(new Color(255, 250, 240));
 
-		// Chart panel component object
+		// cart panel component object
 		JLabel creditCardLbl = new JLabel("Credit Card Number : ");
-		creditCardLbl.setBounds(55, 318, 292, 39);
+		//creditCardLbl.setBounds(55, 318, 292, 39);
 		creditCardNo = new JTextField ();
-		creditCardNo.setBounds(374, 315, 292, 45);
+		//creditCardNo.setBounds(374, 315, 292, 45);
  		JLabel orderedList = new JLabel("Ordered List ");
- 		orderedList.setBounds(55, 25, 172, 39);
+ 		orderedList.setHorizontalAlignment(JLabel.CENTER);
+ 		//orderedList.setBounds(55, 25, 172, 39);
 		JButton processPayment = new JButton ("Process Payment");
-		processPayment.setBounds(670, 314, 265, 47);
+		//processPayment.setBounds(670, 314, 265, 47);
 
-		// Style chart panel
-		chartPanel.setBackground(new Color(255, 250, 240));
-		chartPanel.setLayout(null);
+		// Style cart panel
+		//cartPanel.setBackground(new Color(255, 250, 240));
+
 		
 
 		// Style credit card label
@@ -210,17 +229,102 @@ private static final long serialVersionUID = 1L;
 		// Style the process payment button
 		processPayment.setFont(font);
 		
-		
-        
+		JScrollPane scrollPanel = new JScrollPane(cartListPanel);
+
+		JPanel paymentPanel = new JPanel();
+		//paymentPanel.add(creditCardLbl);
+		//paymentPanel.add(creditCardNo);
+		creditCardNo.setPreferredSize(new Dimension(300,50));
+		paymentPanel.add(processPayment);		
 		// Add all components to panel
-		chartPanel.add(orderedList);
-		chartPanel.add(creditCardNo);
-		chartPanel.add(processPayment);
-		chartPanel.add(creditCardLbl);
-		return chartPanel;
+
+		cartPanel.add(BorderLayout.NORTH,orderedList);
+		cartPanel.add(BorderLayout.CENTER,scrollPanel);
+		cartPanel.add(BorderLayout.SOUTH,paymentPanel);
+
+		return cartPanel;
 		
 	}
+	
+	public void setCartListPanel(ItemProduct product,ImageIcon image,JButton addCartBtn) {
+		JLabel noLabel = new JLabel(Integer.toString(++cartIndex));
 
+		JLabel productLabel = new JLabel(product.getName());
+		JLabel productImgLabel = new JLabel();
+		productImgLabel.setIcon(image);
+		SpinnerModel model = new SpinnerNumberModel(1,1,10,1);
+		JSpinner quantity = new JSpinner(model);
+		//set JSpinner not editable
+		((DefaultEditor) quantity.getEditor()).getTextField().setEditable(false);
+		quantity.setPreferredSize(new Dimension(50,20));
+		JLabel productPriceLabel = new JLabel(format.format(product.getPrice()));
+		float total = product.getPrice() * (Integer)quantity.getValue();
+		JLabel totalPriceLabel = new JLabel(format.format(total));
+		JButton removeBtn = new JButton("Remove");
+		removeBtn.setPreferredSize(new Dimension(100,40));	
+		
+		JPanel btnPanel = new JPanel();
+		btnPanel.add(removeBtn);
+		
+		btnPanel.setPreferredSize(new Dimension(100,50));	
+		JPanel panel = new JPanel();
+		FlowLayout layout = new FlowLayout(FlowLayout.LEFT);
+		panel.setLayout(layout);
+
+		panel.add(Box.createRigidArea(new Dimension(3 - noLabel.getPreferredSize().width,0)));
+		panel.add(noLabel);
+		panel.add(Box.createRigidArea(new Dimension(300 - productLabel.getPreferredSize().width,0)));
+		panel.add(productLabel);
+		panel.add(Box.createRigidArea(new Dimension(200 - productImgLabel.getPreferredSize().width,0)));
+		panel.add(productImgLabel);
+		panel.add(Box.createRigidArea(new Dimension(100 - quantity.getPreferredSize().width,0)));
+		panel.add(quantity);
+		panel.add(Box.createRigidArea(new Dimension(100 - productPriceLabel.getPreferredSize().width,0)));
+		panel.add(productPriceLabel);
+		panel.add(Box.createRigidArea(new Dimension(100 - totalPriceLabel.getPreferredSize().width,0)));
+		panel.add(totalPriceLabel);
+		panel.add(Box.createRigidArea(new Dimension(200 - btnPanel.getPreferredSize().width,0)));
+		panel.add(btnPanel);
+		cartListPanel.add(panel);
+		
+		addCartBtn.setEnabled(false);
+		
+		quantity.addChangeListener(new ChangeListener() {
+
+			public void stateChanged(ChangeEvent e) {
+				float total = product.getPrice() * (Integer)quantity.getValue();
+				totalPriceLabel.setText(format.format(total));
+			}
+		});
+		
+		KioskFrame frame = this;
+		removeBtn.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				cartListPanel.remove(panel);
+				cartIndex--;
+				refreshCartIndex();
+				addCartBtn.setEnabled(true);
+				frame.revalidate();
+				frame.repaint();
+				
+			}
+			
+		});
+
+		System.out.println("haha");
+	}
+
+	private void refreshCartIndex() {
+		
+		for(int currentPanel = 0;currentPanel < cartIndex; currentPanel++) {
+			
+			JPanel panel = (JPanel)cartListPanel.getComponent(currentPanel);
+			JLabel label = (JLabel)panel.getComponent(1);
+			label.setText(Integer.toString(currentPanel + 1 ));
+			
+		}
+	}
 	private void loadComponent()
 	{
 
@@ -228,10 +332,10 @@ private static final long serialVersionUID = 1L;
 		Font font = this.getFontStyle();
 
 		// Upper layer
-		getContentPane().add(getMenuPanel(font));
+		this.add(getMenuPanel(font));
 
 		// Lower layer
-		getContentPane().add(getChartPanel(font));
+		this.add(getCartPanel(font));
 
 ;	}
 	

@@ -17,7 +17,9 @@ public class TCPKioskClientApplication {
 		//set frame to visible
 		KioskFrame kioskFrame = new KioskFrame();
 		kioskFrame.setVisible(true);
-
+		//ListContent content = new ListContent();
+		//content.setImages();
+		/*
 		//connect to order server
 		Socket socket = new Socket(InetAddress.getLocalHost(),4228);
 
@@ -55,6 +57,6 @@ public class TCPKioskClientApplication {
 			String errorMessage = inputStream.readUTF();
 			//kioskFrame.setErrorMessage(errorMessage);
 		}
-			
+			*/
 	}
 }
