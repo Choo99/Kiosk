@@ -244,17 +244,7 @@ private static final long serialVersionUID = 1L;
 		//paymentPanel.add(creditCardNo);
 		creditCardNo.setPreferredSize(new Dimension(300,50));
 		paymentPanel.add(processPayment);	
-		KioskFrame frame = this;
-		processPayment.addActionListener(new ActionListener(){
 
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				
-				//frame.getContentPane()
-				
-			}
-			
-		});
 		// Add all components to panel
 
 		cartPanel.add(BorderLayout.NORTH,orderedList);
