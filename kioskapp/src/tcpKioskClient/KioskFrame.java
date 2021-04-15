@@ -145,7 +145,8 @@ private static final long serialVersionUID = 1L;
 	}
 	
 	private JPanel setMenuList(ArrayList<ItemProduct> productList,ArrayList<ImageIcon> images) {
-		JPanel menu = new JPanel(new GridLayout(productList.size(),1));
+		JPanel menu = new JPanel(new GridLayout(productList.size() + 1,1));
+
 		
 		for(int counter = 0;counter<productList.size();counter++) {
 			ItemProduct itemProduct = productList.get(counter);
