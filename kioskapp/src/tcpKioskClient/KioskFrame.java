@@ -5,6 +5,7 @@ import java.awt.FlowLayout;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -12,14 +13,17 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JSpinner.DefaultEditor;
+import javax.swing.JTabbedPane;
 import javax.swing.JLabel;
 import java.awt.Font;
 import java.awt.GridLayout;
-import java.awt.Label;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
@@ -30,9 +34,14 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.border.Border;
 
 import kioskapp.itemproduct.ItemProduct;
+import kioskapp.order.Order;
+import kioskapp.ordereditem.OrderedItem;
+import kioskapp.ordertransaction.OrderTransaction;
 
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
+import controller.ItemProductController;
 
 public class KioskFrame extends JFrame {
 
@@ -47,6 +56,13 @@ private static final long serialVersionUID = 1L;
 	private JTable table;
 	private JPanel cartListPanel;
 	private int cartIndex = 0;
+	private JPanel paymentListPanel;
+	private float totalPrice = 0;
+	private JLabel totalPriceLabel;
+	private JLabel priceLabel;
+	private JTabbedPane tabbedPanel;
+	private OrderTransaction orderTransaction;
+	private String creditCardNumber;
 	//private JPanel menuPanel;
 	//private JScrollPane menuScrollPanel;
 	
@@ -56,12 +72,14 @@ private static final long serialVersionUID = 1L;
 	public KioskFrame() {
 		
 		//getContentPane().setLayout(new BorderLayout());
-		getContentPane().setLayout(new GridLayout(2,1));
 		this.setTitle("Kiosk Application");
 		this.setSize(width, height);
 		
 		cartListPanel = new JPanel(new GridLayout(10,1));
+		paymentListPanel = new JPanel(new GridLayout(20,1));
+		paymentListPanel.setBackground(new Color(255, 250, 240));
 		
+		totalPriceLabel = new JLabel("RM 0.00");
 		//menuPanel = new JPanel(new BorderLayout());
 		
 		//menuScrollPanel = new JScrollPane();
@@ -89,7 +107,7 @@ private static final long serialVersionUID = 1L;
 		
 			// Menu panel component object
 			JLabel listLabel = new JLabel("List Of Food");
-			listLabel.setBackground(new Color(70, 130, 180));
+
 			
 			// Style the menu panel
             menuPanel.setBackground(new Color(255, 250, 240));
@@ -192,7 +210,7 @@ private static final long serialVersionUID = 1L;
 
 				public void actionPerformed(ActionEvent e) {
 					setCartListPanel(itemProduct,image,addCartBtn);
-					
+					tabbedPanel.setEnabledAt(1, true);
 					frame.revalidate();
 					frame.repaint();
 				}
@@ -210,23 +228,17 @@ private static final long serialVersionUID = 1L;
 		cartPanel.setBackground(new Color(255, 250, 240));
 
 		// cart panel component object
-		JLabel creditCardLbl = new JLabel("Credit Card Number : ");
-		//creditCardLbl.setBounds(55, 318, 292, 39);
 		creditCardNo = new JTextField ();
-		//creditCardNo.setBounds(374, 315, 292, 45);
  		JLabel orderedList = new JLabel("Ordered List ");
  		orderedList.setHorizontalAlignment(JLabel.CENTER);
- 		//orderedList.setBounds(55, 25, 172, 39);
 		JButton processPayment = new JButton ("Process Payment");
-		//processPayment.setBounds(670, 314, 265, 47);
+
 
 		// Style cart panel
+		cartListPanel.setOpaque(true);
+		cartListPanel.setBackground(new Color(255, 250, 240));
 		//cartPanel.setBackground(new Color(255, 250, 240));
-
 		
-
-		// Style credit card label
-		creditCardLbl.setFont(font);
 
 		// Style credit card textField
 		creditCardNo.setFont(font);		
@@ -237,19 +249,43 @@ private static final long serialVersionUID = 1L;
 		// Style the process payment button
 		processPayment.setFont(font);
 		
+		processPayment.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+
+				setPaymentListPanel();
+				priceLabel.setText("RM " + format.format(totalPrice));
+				tabbedPanel.setEnabledAt(0, false);
+				tabbedPanel.setEnabledAt(1, false);
+				tabbedPanel.setSelectedIndex(2);
+			}
+			
+		});
+		
+		JPanel labelPanel = new JPanel();
+		labelPanel.add(Box.createRigidArea(new Dimension(0,50)));
+		labelPanel.add(orderedList);
+		
 		JScrollPane scrollPanel = new JScrollPane(cartListPanel);
 
-		JPanel paymentPanel = new JPanel();
-		//paymentPanel.add(creditCardLbl);
-		//paymentPanel.add(creditCardNo);
+		JPanel pricePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		JLabel totalLabel = new JLabel("Total Price : ");
+		totalPriceLabel.setFont(font);
+		totalLabel.setFont(font);
+		totalLabel.setVerticalTextPosition(1);
 		creditCardNo.setPreferredSize(new Dimension(300,50));
-		paymentPanel.add(processPayment);	
+		
+		pricePanel.add(totalLabel);
+		pricePanel.add(Box.createRigidArea(new Dimension(5,50)));
+		pricePanel.add(totalPriceLabel);
+		pricePanel.add(Box.createRigidArea(new Dimension(5,0)));
+		pricePanel.add(processPayment);
 
 		// Add all components to panel
 
-		cartPanel.add(BorderLayout.NORTH,orderedList);
+		cartPanel.add(BorderLayout.NORTH,labelPanel);
 		cartPanel.add(BorderLayout.CENTER,scrollPanel);
-		cartPanel.add(BorderLayout.SOUTH,paymentPanel);
+		cartPanel.add(BorderLayout.SOUTH,pricePanel);
 
 		return cartPanel;
 		
@@ -270,9 +306,11 @@ private static final long serialVersionUID = 1L;
 		//set JSpinner not editable
 		((DefaultEditor) quantity.getEditor()).getTextField().setEditable(false);
 		quantity.setPreferredSize(new Dimension(50,20));
-		JLabel productPriceLabel = new JLabel(format.format(product.getPrice()));
+		JLabel productPriceLabel = new JLabel("RM " + format.format(product.getPrice()));
 		float total = product.getPrice() * (Integer)quantity.getValue();
-		JLabel totalPriceLabel = new JLabel(format.format(total));
+		totalPrice += total;
+		totalPriceLabel.setText("RM " + format.format(totalPrice));
+		JLabel subtotalPriceLabel = new JLabel(format.format(total));
 		JButton removeBtn = new JButton("Remove");
 		removeBtn.setPreferredSize(new Dimension(100,40));	
 		
@@ -294,10 +332,14 @@ private static final long serialVersionUID = 1L;
 		panel.add(quantity);
 		panel.add(Box.createRigidArea(new Dimension(100 - productPriceLabel.getPreferredSize().width,0)));
 		panel.add(productPriceLabel);
-		panel.add(Box.createRigidArea(new Dimension(100 - totalPriceLabel.getPreferredSize().width,0)));
-		panel.add(totalPriceLabel);
+		panel.add(Box.createRigidArea(new Dimension(100 - subtotalPriceLabel.getPreferredSize().width,0)));
+		panel.add(subtotalPriceLabel);
 		panel.add(Box.createRigidArea(new Dimension(200 - btnPanel.getPreferredSize().width,0)));
 		panel.add(btnPanel);
+		
+		//add border to the panel
+		Border border = BorderFactory.createTitledBorder(" ");
+		panel.setBorder(border);
 		cartListPanel.add(panel);
 		
 		addCartBtn.setEnabled(false);
@@ -305,8 +347,11 @@ private static final long serialVersionUID = 1L;
 		quantity.addChangeListener(new ChangeListener() {
 
 			public void stateChanged(ChangeEvent e) {
-				float total = product.getPrice() * (Integer)quantity.getValue();
-				totalPriceLabel.setText(format.format(total));
+				float newTotal = product.getPrice() * (Integer)quantity.getValue();
+				float oldTotal = Float.parseFloat(subtotalPriceLabel.getText());
+				subtotalPriceLabel.setText(format.format(newTotal));
+				totalPrice += newTotal - oldTotal;
+				totalPriceLabel.setText("RM " + format.format(totalPrice));
 			}
 		});
 		
@@ -316,6 +361,9 @@ private static final long serialVersionUID = 1L;
 			public void actionPerformed(ActionEvent e) {
 				cartListPanel.remove(panel);
 				cartIndex--;
+				float newTotal = product.getPrice() * (Integer)quantity.getValue();
+				totalPrice -= newTotal ;
+				totalPriceLabel.setText("RM " +format.format(totalPrice));
 				refreshCartIndex();
 				addCartBtn.setEnabled(true);
 				frame.revalidate();
@@ -324,7 +372,198 @@ private static final long serialVersionUID = 1L;
 			
 		});
 	}
+	
+	private JPanel getPaymentPanel(Font font) {
+		
+		JPanel paymentPanel = new JPanel(new BorderLayout());
+		paymentPanel.setBackground(new Color(255, 250, 240));
+		
+		//JPanel paymentDetailPanel = new JPanel();
+		
+		JLabel paymentLabel = new JLabel("Payment");
+		paymentLabel.setFont(font);
+		paymentLabel.setHorizontalAlignment(JLabel.CENTER);
 
+		JPanel totalPanel = getTotalPanel(font);
+		JPanel nestedTotalPanel = new JPanel();
+		nestedTotalPanel.add(totalPanel);
+		JScrollPane scrollPanel = new JScrollPane(paymentListPanel);
+		//paymentDetailPanel.add(scrollPanel);
+		//paymentDetailPanel.add(totalPanel);
+		
+		paymentPanel.add(BorderLayout.NORTH,paymentLabel);
+
+		//paymentPanel.add(BorderLayout.CENTER,paymentDetailPanel);
+		paymentPanel.add(BorderLayout.CENTER,scrollPanel);
+		paymentPanel.add(BorderLayout.EAST,nestedTotalPanel);
+		paymentPanel.add(BorderLayout.SOUTH,Box.createRigidArea(new Dimension (0,200)));
+		return paymentPanel;
+	}
+	
+	private JPanel getTotalPanel(Font font) {
+		JPanel totalPanel = new JPanel();
+		totalPanel.setLayout(new BoxLayout(totalPanel,BoxLayout.Y_AXIS));
+		
+		JLabel orderSummaryLabel = new JLabel("Order Summary");
+		JLabel totalPriceLabel = new JLabel("Total: ");
+		
+		priceLabel = new JLabel("RM " + format.format(totalPrice));
+		
+		JLabel tax = new JLabel("(included GST)");
+		tax.setHorizontalAlignment(JLabel.CENTER);
+		
+		JTextField creditCardTextField = new JTextField("Credit Card Number");
+		
+		JButton confirmBtn = new JButton("Confirm");
+		JButton backBtn = new JButton("Back");
+		
+		//styling all component
+		orderSummaryLabel.setFont(font);
+		totalPriceLabel.setFont(font);
+		priceLabel.setFont(font);
+		tax.setFont(new Font("Yu Mincho Light", Font.ITALIC, 15));
+		creditCardTextField.setFont(new Font("Yu Mincho Light", Font.ITALIC, 15));
+		creditCardTextField.setForeground(Color.GRAY);
+		confirmBtn.setFont(font);
+		backBtn.setFont(font);
+		
+		
+		JPanel orderSummary = new JPanel();
+		orderSummary.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.BLACK));
+		orderSummary.add(orderSummaryLabel);
+		
+		JPanel pricePanel = new JPanel();
+		pricePanel.add(totalPriceLabel);
+		pricePanel.add(priceLabel);
+		
+		JPanel creditCardPanel = new JPanel();
+		creditCardTextField.setPreferredSize(new Dimension(210,30));
+		creditCardPanel.add(creditCardTextField);
+		
+		JPanel confirmBtnPanel = new JPanel();
+		confirmBtn.setPreferredSize(new Dimension(210,40));
+		confirmBtnPanel.add(confirmBtn);
+		
+		JPanel backBtnPanel = new JPanel();
+		backBtn.setPreferredSize(new Dimension(210,40));
+		backBtnPanel.add(backBtn);
+		
+		totalPanel.add(orderSummary);
+		totalPanel.add(pricePanel);
+		totalPanel.add(tax);
+		totalPanel.add(creditCardPanel);
+		totalPanel.add(confirmBtnPanel);
+		totalPanel.add(backBtnPanel);
+		
+		totalPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		
+		creditCardTextField.addFocusListener(new FocusListener() {
+
+			public void focusGained(FocusEvent e) {
+		
+				creditCardTextField.setText("");
+			}
+
+			public void focusLost(FocusEvent e) {
+				creditCardTextField.setText("Credit Card Number");
+			}
+		});
+		
+		backBtn.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				tabbedPanel.setEnabledAt(0, true);
+				tabbedPanel.setEnabledAt(1, true);
+				tabbedPanel.setEnabledAt(2, false);
+				paymentListPanel.removeAll();
+				tabbedPanel.setSelectedIndex(1);
+			}
+			
+		});
+		
+		confirmBtn.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				getOrderedItem(creditCardTextField);
+			}
+			
+		});
+		return totalPanel;
+	}
+	
+	private void setPaymentListPanel() {
+		Component[] components = cartListPanel.getComponents();
+		for(int count = 0; count<cartIndex;count++) {
+			
+			JPanel panel = (JPanel)components[count];
+			JPanel newPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+			
+			JLabel noLabel = new JLabel(Integer.toString(count));
+			
+			JLabel productLabel = (JLabel)panel.getComponent(3);
+			JLabel newProductLabel = new JLabel(productLabel.getText());
+			
+			JLabel productImage = (JLabel)panel.getComponent(5);
+			JLabel newProductImage = new JLabel();
+			newProductImage.setIcon(productImage.getIcon());
+			
+			JSpinner quantitySpinner = (JSpinner)panel.getComponent(7);
+			int quantity = (Integer)quantitySpinner.getValue();
+			JLabel newQuantityLabel = new JLabel(Integer.toString(quantity));
+			
+			JLabel subtotalLabel = (JLabel)panel.getComponent(11);
+			JLabel newSubtotalLabel = new JLabel(subtotalLabel.getText());
+			
+			newPanel.add(Box.createRigidArea(new Dimension (3 - noLabel.getPreferredSize().width,0)));
+			newPanel.add(noLabel);
+			newPanel.add(Box.createRigidArea(new Dimension (280 - newProductLabel.getPreferredSize().width,0)));
+			newPanel.add(newProductLabel);
+			newPanel.add(Box.createRigidArea(new Dimension (200 - newProductImage.getPreferredSize().width,0)));
+			newPanel.add(newProductImage);
+			newPanel.add(Box.createRigidArea(new Dimension (70 - newQuantityLabel.getPreferredSize().width,0)));
+			newPanel.add(newQuantityLabel);
+			newPanel.add(Box.createRigidArea(new Dimension (100 - newSubtotalLabel.getPreferredSize().width,0)));
+			newPanel.add(newSubtotalLabel);
+			
+			newPanel.setBorder(BorderFactory.createTitledBorder(" "));
+			
+			paymentListPanel.add(newPanel);
+		}
+	}
+
+	private void getOrderedItem(JTextField creditNumber) {
+		
+		Component[] component = paymentListPanel.getComponents();
+		ArrayList<OrderedItem> orderedItems = new ArrayList<OrderedItem>();
+		for(int counter = 0; counter < component.length ; counter++) {
+			
+			OrderedItem orderedItem = new OrderedItem();
+			JPanel panel = (JPanel)component[counter];
+			
+			JLabel productName = (JLabel)panel.getComponent(1);
+			ItemProductController converter = new ItemProductController();
+			orderedItem.setOrderedItem(converter.getItemProductID(productName.getText()));
+			
+			JLabel quantity = (JLabel)panel.getComponent(3);
+			orderedItem.setQuantity(Integer.parseInt(quantity.getText()));
+			
+			JLabel subtotal = (JLabel)panel.getComponent(5);
+			orderedItem.setSubTotalAmount(Float.parseFloat(subtotal.getText()));
+			
+			orderedItems.add(orderedItem);
+		}
+		Order order = new Order();
+		order.setOrderedItems(orderedItems);
+		order.setTotalAmount(totalPrice);
+		
+		OrderTransaction orderTransaction = new OrderTransaction();
+		orderTransaction.setOrder(order);
+		orderTransaction.setOrderMode("");
+		this.creditCardNumber = creditNumber.getText();
+		 
+		this.orderTransaction = orderTransaction;
+	}
+	
 	private void refreshCartIndex() {
 		
 		for(int currentPanel = 0;currentPanel < cartIndex; currentPanel++) {
@@ -335,17 +574,26 @@ private static final long serialVersionUID = 1L;
 			
 		}
 	}
+	
 	private void loadComponent()
 	{
 
 		// Get font
 		Font font = this.getFontStyle();
 
-		// Upper layer
-		getContentPane().add(getMenuPanel(font));
+		tabbedPanel = new JTabbedPane();
+		// Menu tab
+		
+		tabbedPanel.addTab("Menu List", getMenuPanel(font));
 
-		// Lower layer
-		getContentPane().add(getCartPanel(font));
+		// Cart tab
+		tabbedPanel.addTab("Cart List", getCartPanel(font));
+		//Payment tab
+		tabbedPanel.addTab("Payment", getPaymentPanel(font));
+		tabbedPanel.setEnabledAt(2, false);
+		tabbedPanel.setEnabledAt(1, false);
+		
+		add(tabbedPanel);
 
 ;	}
 	
