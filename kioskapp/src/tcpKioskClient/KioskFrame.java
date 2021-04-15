@@ -3,6 +3,7 @@ package tcpKioskClient;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -14,6 +15,7 @@ import javax.swing.JSpinner.DefaultEditor;
 import javax.swing.JLabel;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Label;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -25,6 +27,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.border.Border;
 
 import kioskapp.itemproduct.ItemProduct;
 
@@ -86,6 +89,7 @@ private static final long serialVersionUID = 1L;
 		
 			// Menu panel component object
 			JLabel listLabel = new JLabel("List Of Food");
+			listLabel.setBackground(new Color(70, 130, 180));
 			
 			// Style the menu panel
             menuPanel.setBackground(new Color(255, 250, 240));
@@ -145,17 +149,16 @@ private static final long serialVersionUID = 1L;
 	}
 	
 	private JPanel setMenuList(ArrayList<ItemProduct> productList,ArrayList<ImageIcon> images) {
-		JPanel menu = new JPanel(new GridLayout(productList.size() + 1,1));
+		JPanel menu = new JPanel(new GridLayout(10,3));
 
 		
 		for(int counter = 0;counter<productList.size();counter++) {
 			ItemProduct itemProduct = productList.get(counter);
 			ImageIcon image = images.get(counter);
-			JLabel noLabel = new JLabel(Integer.toString(counter+1));
 			JLabel productLabel = new JLabel(itemProduct.getName());
 			JLabel productImgLabel = new JLabel();
 			productImgLabel.setIcon(image);
-			JLabel productPriceLabel = new JLabel(format.format(itemProduct.getPrice()));
+			JLabel productPriceLabel = new JLabel("RM" + format.format(itemProduct.getPrice()));
 			JButton addCartBtn = new JButton("Add Cart");
 			addCartBtn.setPreferredSize(new Dimension(100,40));	
 
@@ -163,22 +166,26 @@ private static final long serialVersionUID = 1L;
 			btnPanel.add(addCartBtn);
 			btnPanel.setPreferredSize(new Dimension(100,50));	
 			
-			JPanel panel = new JPanel();
+			JPanel allInOnePanel = new JPanel();
 			//GridLayout layout = new GridLayout();
-			FlowLayout layout = new FlowLayout(FlowLayout.LEFT);
-			panel.setLayout(layout);
-
-			panel.add(Box.createRigidArea(new Dimension(3 - noLabel.getPreferredSize().width,0)));
-			panel.add(noLabel);
-			panel.add(Box.createRigidArea(new Dimension(300 - productLabel.getPreferredSize().width,0)));
-			panel.add(productLabel);
-			panel.add(Box.createRigidArea(new Dimension(200 - productImgLabel.getPreferredSize().width,0)));
-			panel.add(productImgLabel);
-			panel.add(Box.createRigidArea(new Dimension(200 - productPriceLabel.getPreferredSize().width,0)));
-			panel.add(productPriceLabel);
-			panel.add(Box.createRigidArea(new Dimension(200 - btnPanel.getPreferredSize().width,0)));
-			panel.add(btnPanel);
-			menu.add(panel);
+			BorderLayout layout = new BorderLayout();
+			allInOnePanel.setLayout(layout);
+			
+			Border border = BorderFactory.createLineBorder(new Color(70, 130, 180));
+			allInOnePanel.setBorder(BorderFactory.createTitledBorder(border,productLabel.getText()));
+			allInOnePanel.add(BorderLayout.CENTER,productImgLabel);
+			productImgLabel.setHorizontalAlignment(JLabel.CENTER);
+			
+			JPanel secondPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+			Border secondBorderLine = BorderFactory.createMatteBorder(1, 0, 0, 0, new Color(70, 130, 180));
+			secondBorderLine = BorderFactory.createTitledBorder(secondBorderLine);
+			secondPanel.setBorder(secondBorderLine);
+			secondPanel.add(productPriceLabel);
+			secondPanel.add(Box.createRigidArea(new Dimension(200 - btnPanel.getPreferredSize().width,0)));
+			secondPanel.add(btnPanel);
+		
+			allInOnePanel.add(BorderLayout.SOUTH,secondPanel);
+			menu.add(allInOnePanel);
 			
 			KioskFrame frame = this;
 			addCartBtn.addActionListener(new ActionListener() {
@@ -236,7 +243,18 @@ private static final long serialVersionUID = 1L;
 		//paymentPanel.add(creditCardLbl);
 		//paymentPanel.add(creditCardNo);
 		creditCardNo.setPreferredSize(new Dimension(300,50));
-		paymentPanel.add(processPayment);		
+		paymentPanel.add(processPayment);	
+		KioskFrame frame = this;
+		processPayment.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				//frame.getContentPane()
+				
+			}
+			
+		});
 		// Add all components to panel
 
 		cartPanel.add(BorderLayout.NORTH,orderedList);
@@ -252,6 +270,10 @@ private static final long serialVersionUID = 1L;
 
 		JLabel productLabel = new JLabel(product.getName());
 		JLabel productImgLabel = new JLabel();
+		//rescaled image
+		ListContent listContent = new ListContent();
+		image = listContent.setRescaledImages(image);
+		
 		productImgLabel.setIcon(image);
 		SpinnerModel model = new SpinnerNumberModel(1,1,10,1);
 		JSpinner quantity = new JSpinner(model);
@@ -308,12 +330,9 @@ private static final long serialVersionUID = 1L;
 				addCartBtn.setEnabled(true);
 				frame.revalidate();
 				frame.repaint();
-				
 			}
 			
 		});
-
-		System.out.println("haha");
 	}
 
 	private void refreshCartIndex() {
@@ -333,10 +352,10 @@ private static final long serialVersionUID = 1L;
 		Font font = this.getFontStyle();
 
 		// Upper layer
-		this.add(getMenuPanel(font));
+		getContentPane().add(getMenuPanel(font));
 
 		// Lower layer
-		this.add(getCartPanel(font));
+		getContentPane().add(getCartPanel(font));
 
 ;	}
 	

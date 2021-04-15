@@ -63,7 +63,7 @@ public class ListContent {
 			for(int currentString = 0;currentString < 13;currentString++) {
 				Image image = ImageIO.read(new File(paths[currentString]));
 				Image newImage = image.getScaledInstance(120, 90, Image.SCALE_DEFAULT);
-				ImageIcon icon = new ImageIcon(newImage);
+				ImageIcon icon = new ImageIcon(image);
 				images.add(icon);
 			}
 		} catch (IOException e) {
@@ -71,5 +71,13 @@ public class ListContent {
 		}
 
 		return images;
+	}
+	
+	public ImageIcon setRescaledImages(ImageIcon image){
+		Image oldImage = image.getImage();
+		Image newImage = oldImage.getScaledInstance(120, 90, Image.SCALE_DEFAULT);
+		ImageIcon icon = new ImageIcon(newImage);
+
+		return icon;
 	}
 }
