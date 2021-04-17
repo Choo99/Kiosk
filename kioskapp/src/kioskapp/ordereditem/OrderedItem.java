@@ -1,5 +1,7 @@
 package kioskapp.ordereditem;
 
+import java.io.Serializable;
+
 import kioskapp.itemproduct.ItemProduct;
 
 /**
@@ -9,7 +11,7 @@ import kioskapp.itemproduct.ItemProduct;
  * @author emalianakasmuri
  *
  */
-public class OrderedItem {
+public class OrderedItem implements Serializable{
 	
 	// Declaration of attributes
 	private int orderedItem;	

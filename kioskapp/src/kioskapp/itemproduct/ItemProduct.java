@@ -1,5 +1,7 @@
 package kioskapp.itemproduct;
 
+import java.io.Serializable;
+
 /**
  * This class represent an item product sells by a restaurant,
  * such as Big Mac, 2 pcs Spicy Fried Chicken, Oreo McFlurry 
@@ -7,7 +9,7 @@ package kioskapp.itemproduct;
  *
  */
 
-public class ItemProduct {
+public class ItemProduct implements Serializable{
 	
 	// Declaration of attributes
 	private int itemProduct;

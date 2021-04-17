@@ -1,5 +1,6 @@
 package kioskapp.ordertransaction;
 
+import java.io.Serializable;
 import java.sql.Date;
 
 import kioskapp.order.Order;
@@ -12,7 +13,7 @@ import kioskapp.order.Order;
  * @author emalianakasmuri
  *
  */
-public class OrderTransaction {
+public class OrderTransaction implements Serializable{
 	
 	// Declaration of attributes
 	
