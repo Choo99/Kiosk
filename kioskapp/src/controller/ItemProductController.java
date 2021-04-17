@@ -37,13 +37,13 @@ public class ItemProductController {
 			productID = 10;
 			break;
 		case "Filet-O-Fish Meal (Medium)":
-			productID = 10;
+			productID = 11;
 			break;
 		case "Strawberry Sundae":
-			productID = 10;
+			productID = 13;
 			break;
 		case "Chocolate Sundae":
-			productID = 10;
+			productID = 14;
 			break;
 		}
 		return productID;
