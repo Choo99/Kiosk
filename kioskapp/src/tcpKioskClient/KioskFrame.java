@@ -3,20 +3,27 @@ package tcpKioskClient;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 
+import javax.imageio.ImageIO;
+import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JSpinner.DefaultEditor;
 import javax.swing.JTabbedPane;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -24,8 +31,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.io.File;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 
 import javax.swing.JTable;
@@ -63,6 +73,9 @@ private static final long serialVersionUID = 1L;
 	private JLabel priceLabel;
 	private JTabbedPane tabbedPanel;
 	private OrderTransaction orderTransaction;
+	private boolean transactionStatus;
+	private String orderMode; 
+
 	//private JPanel menuPanel;
 	//private JScrollPane menuScrollPanel;
 	
@@ -95,9 +108,10 @@ private static final long serialVersionUID = 1L;
 		// Display component
 		loadComponent();
 		
-		
-		
-		
+	}
+	
+	public void setTransactionStatus(boolean status) {
+		transactionStatus = status;
 	}
 	
 	public String getCreditCardNumber() {
@@ -107,6 +121,12 @@ private static final long serialVersionUID = 1L;
 	public void waitForInput() throws InterruptedException {
 		synchronized(this) {
 			wait();
+		}
+	}
+	
+	public void release() throws InterruptedException {
+		synchronized(this) {
+			notifyAll();
 		}
 	}
 	
@@ -226,7 +246,7 @@ private static final long serialVersionUID = 1L;
 
 				public void actionPerformed(ActionEvent e) {
 					setCartListPanel(itemProduct,image,addCartBtn);
-					tabbedPanel.setEnabledAt(1, true);
+					tabbedPanel.setEnabledAt(2, true);
 					frame.revalidate();
 					frame.repaint();
 				}
@@ -251,7 +271,7 @@ private static final long serialVersionUID = 1L;
 
 
 		// Style cart panel
-		cartListPanel.setOpaque(true);
+		cartListPanel.setOpaque(false);
 		cartListPanel.setBackground(new Color(255, 250, 240));
 		//cartPanel.setBackground(new Color(255, 250, 240));
 		
@@ -273,7 +293,8 @@ private static final long serialVersionUID = 1L;
 				priceLabel.setText("RM " + format.format(totalPrice));
 				tabbedPanel.setEnabledAt(0, false);
 				tabbedPanel.setEnabledAt(1, false);
-				tabbedPanel.setSelectedIndex(2);
+				tabbedPanel.setEnabledAt(2, false);
+				tabbedPanel.setSelectedIndex(3);
 			}
 			
 		});
@@ -491,9 +512,10 @@ private static final long serialVersionUID = 1L;
 			public void actionPerformed(ActionEvent e) {
 				tabbedPanel.setEnabledAt(0, true);
 				tabbedPanel.setEnabledAt(1, true);
-				tabbedPanel.setEnabledAt(2, false);
+				tabbedPanel.setEnabledAt(2, true);
+				tabbedPanel.setEnabledAt(3, false);
 				paymentListPanel.removeAll();
-				tabbedPanel.setSelectedIndex(1);
+				tabbedPanel.setSelectedIndex(2);
 			}
 			
 		});
@@ -541,6 +563,110 @@ private static final long serialVersionUID = 1L;
 		}
 	}
 
+	private JPanel getWelcomePanel(Font font)
+	{
+		JPanel welcomePanel = new JPanel(new BorderLayout());
+		JLabel textLabel = new JLabel("Welcome To Mc Daniel!");
+		JLabel logoLabel = new JLabel();
+
+		//Set colour
+		welcomePanel.setBackground(new Color(255, 228, 196));
+		//Insert imageIcon
+		ImageIcon logoIcon = null;
+		try {
+			Image logo = ImageIO.read(new File("src/image/McDonaldLogo.png"));
+			logoIcon = new ImageIcon(logo);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		logoLabel.setIcon(logoIcon);
+		
+		JRadioButton eatIn = new JRadioButton("Eat In");
+		JRadioButton takeAway = new JRadioButton("Take Away");
+		eatIn.setOpaque(false);
+		takeAway.setOpaque(false);
+		eatIn.setActionCommand("Eat In");
+		takeAway.setActionCommand("Take Away");
+		
+		ButtonGroup selection = new ButtonGroup();
+		selection.add(eatIn);
+		selection.add(takeAway);
+		
+		//Add button
+		JButton comfirmButton=new JButton("Next");
+		
+		//Set font
+		textLabel.setFont(font);
+		eatIn.setFont(font);
+		takeAway.setFont(font);
+		comfirmButton.setFont(font);
+		
+		//Add Component into gridLayout
+		JPanel panel = new JPanel(new GridLayout(3,1));
+		panel.setOpaque(false);
+		panel.setBackground(new Color(255, 228, 196));	
+		
+		//open first panel to put icon
+		JPanel innerPanel = new JPanel();
+		innerPanel.setOpaque(false);
+		innerPanel.add(logoLabel);
+		
+		//open inner panel to put text 
+		JPanel innerPanel2 = new JPanel();	
+		innerPanel2.setOpaque(false);
+		innerPanel2.add(textLabel);
+
+		//open second inner panel to put 2 JRadio button
+		JPanel innerPanel3 = new JPanel(new GridLayout(2,1));
+		innerPanel3.setOpaque(false);
+		
+		JPanel innerBtnPanel = new JPanel();
+		innerBtnPanel.setOpaque(false);
+		innerBtnPanel.add(comfirmButton);
+		
+		JPanel innerRadioPanel = new JPanel();
+		innerRadioPanel.setOpaque(false);
+		innerRadioPanel.setOpaque(false);
+		innerRadioPanel.add(eatIn);
+		innerRadioPanel.add(Box.createRigidArea(new Dimension(100,0)));
+		innerRadioPanel.add(takeAway);
+		
+		innerPanel3.add(innerRadioPanel);
+		innerPanel3.add(innerBtnPanel);
+		
+		panel.add(innerPanel);
+		panel.add(innerPanel2);
+		panel.add(innerPanel3);
+		
+		JPanel panel2 = new JPanel();
+		panel2.setOpaque(false);
+		panel2.add(panel);
+		panel2.setBackground(new Color(255, 228, 196));
+		
+		JPanel emptyPanel = new JPanel();
+		emptyPanel.setOpaque(false);
+		emptyPanel.add(Box.createRigidArea(new Dimension(0,100)));
+		
+		//add into panel
+		welcomePanel.add(BorderLayout.NORTH,emptyPanel);
+		welcomePanel.add(BorderLayout.CENTER,panel2);
+
+		
+		//add action listener to button
+		comfirmButton.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				orderMode = selection.getSelection().getActionCommand();
+				tabbedPanel.setSelectedIndex(1);
+				tabbedPanel.setEnabledAt(1, true);
+			}
+			
+		});
+		
+		return welcomePanel;
+	}
+	
 	private void getOrderedItem() {
 		
 		Component[] component = paymentListPanel.getComponents();
@@ -568,7 +694,7 @@ private static final long serialVersionUID = 1L;
 		
 		OrderTransaction orderTransaction = new OrderTransaction();
 		orderTransaction.setOrder(order);
-		orderTransaction.setOrderMode("");
+		orderTransaction.setOrderMode(orderMode);
 		 
 		this.orderTransaction = orderTransaction;
 		
@@ -592,16 +718,20 @@ private static final long serialVersionUID = 1L;
 		Font font = this.getFontStyle();
 
 		tabbedPanel = new JTabbedPane();
-		// Menu tab
 		
+		//Welcome tab
+		tabbedPanel.addTab("Welcome", getWelcomePanel(font));
+		
+		// Menu tab
 		tabbedPanel.addTab("Menu List", getMenuPanel(font));
 
 		// Cart tab
 		tabbedPanel.addTab("Cart List", getCartPanel(font));
 		//Payment tab
 		tabbedPanel.addTab("Payment", getPaymentPanel(font));
-		tabbedPanel.setEnabledAt(2, false);
 		tabbedPanel.setEnabledAt(1, false);
+		tabbedPanel.setEnabledAt(2, false);
+		tabbedPanel.setEnabledAt(3, false);
 		
 		add(tabbedPanel);
 
@@ -619,11 +749,27 @@ private static final long serialVersionUID = 1L;
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		getOrderedItem();
 		
-		synchronized(this) 
-		{
-			notifyAll();
-		}
+		try {
+			getOrderedItem();
+			release();
+			
+			waitForInput();
+			if(transactionStatus) {
+				JOptionPane.showMessageDialog(this,"Transact successfully! Please take your receipt");
+				tabbedPanel.setSelectedIndex(0);
+				cartListPanel.removeAll();
+				paymentListPanel.removeAll();
+			}
+			else {
+				JOptionPane.showMessageDialog(this,
+					    "Invalid Credit Card Number!",
+					    "Transaction Failed",
+					    JOptionPane.WARNING_MESSAGE);
+			}
+		} catch (InterruptedException e1) {
+			
+			e1.printStackTrace();
+		} 
 	}
 }

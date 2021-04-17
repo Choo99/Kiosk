@@ -11,7 +11,7 @@ public class OrderController {
 	private DatabaseConnection db;
 
 	public OrderController(){
-		db=new DatabaseConnection();
+		db = new DatabaseConnection();
 	}
 
 	//insert order into database

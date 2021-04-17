@@ -13,6 +13,11 @@ import kioskapp.itemproduct.ItemProduct;
  */
 public class OrderedItem implements Serializable{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	// Declaration of attributes
 	private int orderedItem;	
 	

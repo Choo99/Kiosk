@@ -1,8 +1,49 @@
 package controller;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import kioskapp.itemproduct.ItemProduct;
+
 public class ItemProductController {
 
+	private DatabaseConnection db;
+	
+	public ItemProductController (){
+		db = new DatabaseConnection();
+	}
+
+	@SuppressWarnings("null")
+	public int getProductID (String productName) throws SQLException{
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		ItemProduct item = new ItemProduct();
+
+		String sql = "SELECT ItemProduct FROM itemproduct WHERE Name = ?";
+		
+		ps = conn.prepareStatement(sql);
+		ps.setString(1, productName);
+
+		rs = ps.executeQuery();
+		rs.next();
+		item.setItemProduct(rs.getInt(1));
+		
+		ps.close();
+		rs.close();
+		conn.close();
+
+		
+		return item.getItemProduct();
+	}
+
+
 	public int getItemProductID(String text) {
+		
+		
+		
 		int productID = 0;
 		switch(text)
 		{

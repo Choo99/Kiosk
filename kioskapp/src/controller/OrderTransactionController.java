@@ -16,7 +16,6 @@ public class OrderTransactionController {
 		db = new DatabaseConnection();
 	}
 
-
 	// To insert transaction detail into database and get the auto generate transaction id
 	@SuppressWarnings("resource")
 	public int insertTransaction(OrderTransaction orderTransaction) throws SQLException{

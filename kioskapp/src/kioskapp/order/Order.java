@@ -15,6 +15,11 @@ public class Order implements Serializable{
 	
 	// Declaration of attributes
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	private int orderId;
 	
 	// Implementation of 1:M

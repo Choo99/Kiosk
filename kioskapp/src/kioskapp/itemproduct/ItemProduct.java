@@ -11,13 +11,17 @@ import java.io.Serializable;
 
 public class ItemProduct implements Serializable{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	// Declaration of attributes
 	private int itemProduct;
 	private String name;
 	private float price;
 	
 	/**
-	 * @return the itemProduct
+	 * @return the itemProduct id
 	 */
 	public int getItemProduct() {
 		return itemProduct;

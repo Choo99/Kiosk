@@ -17,6 +17,10 @@ public class OrderTransaction implements Serializable{
 	
 	// Declaration of attributes
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private int orderTransactionId;
 	private Date transactioDate;
 	private float amountCharged;
