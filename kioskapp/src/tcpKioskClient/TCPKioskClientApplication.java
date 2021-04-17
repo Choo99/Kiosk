@@ -24,7 +24,7 @@ public class TCPKioskClientApplication {
 		
 		kioskFrame.waitForInput();
 
-		/*
+		
 		//connect to order server
 		Socket socket = new Socket(InetAddress.getLocalHost(),4228);
 
@@ -38,7 +38,9 @@ public class TCPKioskClientApplication {
 		//send orderTransaction to order server
 		outputStream.writeObject(objectTransaction);
 		outputStream.writeUTF(creditCardNo);
+		outputStream.flush();
 
+		/*
 		//open an inputStream
 		ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
 

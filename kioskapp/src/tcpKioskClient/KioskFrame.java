@@ -428,7 +428,7 @@ private static final long serialVersionUID = 1L;
 		JLabel tax = new JLabel("(included GST)");
 		tax.setHorizontalAlignment(JLabel.CENTER);
 		
-		JTextField creditCardTextField = new JTextField("Credit Card Number");
+		creditCardNo = new JTextField("Credit Card Number");
 		
 		JButton confirmBtn = new JButton("Confirm");
 		JButton backBtn = new JButton("Back");
@@ -438,8 +438,8 @@ private static final long serialVersionUID = 1L;
 		totalPriceLabel.setFont(font);
 		priceLabel.setFont(font);
 		tax.setFont(new Font("Yu Mincho Light", Font.ITALIC, 15));
-		creditCardTextField.setFont(new Font("Yu Mincho Light", Font.ITALIC, 15));
-		creditCardTextField.setForeground(Color.GRAY);
+		creditCardNo.setFont(new Font("Yu Mincho Light", Font.ITALIC, 15));
+		creditCardNo.setForeground(Color.GRAY);
 		confirmBtn.setFont(font);
 		backBtn.setFont(font);
 		
@@ -453,8 +453,8 @@ private static final long serialVersionUID = 1L;
 		pricePanel.add(priceLabel);
 		
 		JPanel creditCardPanel = new JPanel();
-		creditCardTextField.setPreferredSize(new Dimension(210,30));
-		creditCardPanel.add(creditCardTextField);
+		creditCardNo.setPreferredSize(new Dimension(210,30));
+		creditCardPanel.add(creditCardNo);
 		
 		JPanel confirmBtnPanel = new JPanel();
 		confirmBtn.setPreferredSize(new Dimension(210,40));
@@ -473,15 +473,16 @@ private static final long serialVersionUID = 1L;
 		
 		totalPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		
-		creditCardTextField.addFocusListener(new FocusListener() {
+		creditCardNo.addFocusListener(new FocusListener() {
 
 			public void focusGained(FocusEvent e) {
 		
-				creditCardTextField.setText("");
+				creditCardNo.setText("");
 			}
 
 			public void focusLost(FocusEvent e) {
-				creditCardTextField.setText("Credit Card Number");
+				if(creditCardNo.getText() == "")
+				creditCardNo.setText("Credit Card Number");
 			}
 		});
 		
@@ -568,7 +569,6 @@ private static final long serialVersionUID = 1L;
 		OrderTransaction orderTransaction = new OrderTransaction();
 		orderTransaction.setOrder(order);
 		orderTransaction.setOrderMode("");
-		this.creditCardNumber = creditCardNo.getText();
 		 
 		this.orderTransaction = orderTransaction;
 		

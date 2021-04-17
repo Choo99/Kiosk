@@ -24,6 +24,9 @@ public class TCPOrderServerApplication {
 	int portNo = 4228;
 	ServerSocket serverSocket = new ServerSocket(portNo);
 	
+	TCPOrderServerFrame frame = new TCPOrderServerFrame();
+	frame.setVisible(true);
+	
 	while(true) {
 		
 		//accept client request
@@ -34,19 +37,23 @@ public class TCPOrderServerApplication {
 		//read orderTransaction from client
 		OrderTransaction orderTransaction = (OrderTransaction)inputStream.readObject();
 		String creditCardNo = inputStream.readUTF();
+		frame.updateRequestStatus(creditCardNo);
+		
 		
 		//open a socket to send a request to transaction server
-		Socket socket = new Socket(InetAddress.getLocalHost(),4229);
+		Socket TransactionSocket = new Socket(InetAddress.getLocalHost(),4229);
 		
 		//open an outputStream for transaction server
-		ObjectOutputStream transactionOutputStream = new ObjectOutputStream(socket.getOutputStream());
+		ObjectOutputStream transactionOutputStream = new ObjectOutputStream(TransactionSocket.getOutputStream());
 		transactionOutputStream.writeObject(transactionOutputStream);
 		transactionOutputStream.writeUTF(creditCardNo);
 		
+		
 		//open an inputStream to read result of authorization credit card
-		ObjectInputStream transactionInputStream = new ObjectInputStream(socket.getInputStream());
+		ObjectInputStream transactionInputStream = new ObjectInputStream(TransactionSocket.getInputStream());
 		boolean result = transactionInputStream.readBoolean();
 		
+		/*
 		//open an outputStream to send transaction details to client side
 		ObjectOutputStream outputStream = new ObjectOutputStream(clientSocket.getOutputStream());
 
@@ -68,15 +75,15 @@ public class TCPOrderServerApplication {
 		else {
 			String errorMessage = transactionInputStream.readUTF();
 			outputStream.writeUTF(errorMessage);
-		}
+		}*/
 		
 		//close all object
 		clientSocket.close();
-		socket.close();
+		//TransactionSocket.close();
 		inputStream.close();
-		outputStream.close();
-		transactionOutputStream.close();
-		transactionInputStream.close();
+		//outputStream.close();
+		//transactionOutputStream.close();
+		//transactionInputStream.close();
 	}
 		
 	}
