@@ -7,18 +7,23 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 
+import kioskapp.order.Order;
+import kioskapp.ordereditem.OrderedItem;
 import kioskapp.ordertransaction.OrderTransaction;
 
 public class TCPKioskClientApplication {
 
-	public static void main(String[] args) throws UnknownHostException, IOException, ClassNotFoundException {
+	public static void main(String[] args) throws UnknownHostException, IOException, ClassNotFoundException, InterruptedException {
 		
 		//set frame to visible
 		KioskFrame kioskFrame = new KioskFrame();
 		kioskFrame.setVisible(true);
-		//ListContent content = new ListContent();
-		//content.setImages();
+		
+		kioskFrame.waitForInput();
+
 		/*
 		//connect to order server
 		Socket socket = new Socket(InetAddress.getLocalHost(),4228);
@@ -27,8 +32,9 @@ public class TCPKioskClientApplication {
 		ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
 
 		//get objectTransaction and credit card number from kiosk frame
-		OrderTransaction objectTransaction = null;
-		String creditCardNo =  null;
+		OrderTransaction objectTransaction = kioskFrame.getOrderTransaction();
+		String creditCardNo = kioskFrame.getCreditCardNumber();
+		
 		//send orderTransaction to order server
 		outputStream.writeObject(objectTransaction);
 		outputStream.writeUTF(creditCardNo);

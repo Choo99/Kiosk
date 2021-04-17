@@ -26,6 +26,7 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -43,7 +44,7 @@ import javax.swing.event.ChangeListener;
 
 import controller.ItemProductController;
 
-public class KioskFrame extends JFrame {
+public class KioskFrame extends JFrame implements ActionListener{
 
 private static final long serialVersionUID = 1L;
 	private JTextField creditCardNo ;
@@ -62,7 +63,6 @@ private static final long serialVersionUID = 1L;
 	private JLabel priceLabel;
 	private JTabbedPane tabbedPanel;
 	private OrderTransaction orderTransaction;
-	private String creditCardNumber;
 	//private JPanel menuPanel;
 	//private JScrollPane menuScrollPanel;
 	
@@ -98,6 +98,22 @@ private static final long serialVersionUID = 1L;
 		
 		
 		
+	}
+	
+	public String getCreditCardNumber() {
+		return creditCardNo.getText();
+	}
+	
+	public void waitForInput() throws InterruptedException {
+		synchronized(this) {
+			wait();
+		}
+	}
+	
+	
+	//Return result
+	public OrderTransaction getOrderTransaction() {
+		return this.orderTransaction;
 	}
 	
 	// To return menu panel 
@@ -480,14 +496,7 @@ private static final long serialVersionUID = 1L;
 			}
 			
 		});
-		
-		confirmBtn.addActionListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent e) {
-				getOrderedItem(creditCardTextField);
-			}
-			
-		});
+		confirmBtn.addActionListener(this);
 		return totalPanel;
 	}
 	
@@ -531,23 +540,23 @@ private static final long serialVersionUID = 1L;
 		}
 	}
 
-	private void getOrderedItem(JTextField creditNumber) {
+	private void getOrderedItem() {
 		
 		Component[] component = paymentListPanel.getComponents();
-		ArrayList<OrderedItem> orderedItems = new ArrayList<OrderedItem>();
+		List<OrderedItem> orderedItems = new ArrayList<OrderedItem>();
 		for(int counter = 0; counter < component.length ; counter++) {
 			
 			OrderedItem orderedItem = new OrderedItem();
 			JPanel panel = (JPanel)component[counter];
 			
-			JLabel productName = (JLabel)panel.getComponent(1);
+			JLabel productName = (JLabel)panel.getComponent(3);
 			ItemProductController converter = new ItemProductController();
 			orderedItem.setOrderedItem(converter.getItemProductID(productName.getText()));
 			
-			JLabel quantity = (JLabel)panel.getComponent(3);
+			JLabel quantity = (JLabel)panel.getComponent(7);
 			orderedItem.setQuantity(Integer.parseInt(quantity.getText()));
 			
-			JLabel subtotal = (JLabel)panel.getComponent(5);
+			JLabel subtotal = (JLabel)panel.getComponent(9);
 			orderedItem.setSubTotalAmount(Float.parseFloat(subtotal.getText()));
 			
 			orderedItems.add(orderedItem);
@@ -559,9 +568,10 @@ private static final long serialVersionUID = 1L;
 		OrderTransaction orderTransaction = new OrderTransaction();
 		orderTransaction.setOrder(order);
 		orderTransaction.setOrderMode("");
-		this.creditCardNumber = creditNumber.getText();
+		this.creditCardNumber = creditCardNo.getText();
 		 
 		this.orderTransaction = orderTransaction;
+		
 	}
 	
 	private void refreshCartIndex() {
@@ -605,5 +615,15 @@ private static final long serialVersionUID = 1L;
 		
 		return font;
 		
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		getOrderedItem();
+		
+		synchronized(this) 
+		{
+			notifyAll();
+		}
 	}
 }
