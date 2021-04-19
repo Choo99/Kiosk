@@ -16,7 +16,7 @@ public class ItemProductController {
 	}
 
 	@SuppressWarnings("null")
-	public int getProductID (String productName) throws SQLException{
+	public int getItemProductID (String productName) {
 		Connection conn = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
@@ -24,70 +24,65 @@ public class ItemProductController {
 
 		String sql = "SELECT ItemProduct FROM itemproduct WHERE Name = ?";
 		
-		ps = conn.prepareStatement(sql);
-		ps.setString(1, productName);
-
-		rs = ps.executeQuery();
-		rs.next();
-		item.setItemProduct(rs.getInt(1));
+		try {
+			conn = db.getConnection();
+			ps = conn.prepareStatement(sql);
+			ps.setString(1, productName);
+			rs = ps.executeQuery();
+			if (rs.next())
+				item.setItemProduct(rs.getInt(1));
+			
+		} catch (SQLException | ClassNotFoundException e1) {
+			
+			e1.printStackTrace();
+		}
 		
-		ps.close();
-		rs.close();
-		conn.close();
+		
+		try {
+			ps.close();
+			rs.close();
+			conn.close();
+		} catch (SQLException e) {
+			
+			e.printStackTrace();
+		}
+		
 
 		
 		return item.getItemProduct();
 	}
 
+	
+	public ItemProduct getProduct (int itemProductId)
+	{
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		ItemProduct item = new ItemProduct();
+		
+		String sql = "SELECT Name, Price FROM itemproduct WHERE ItemProduct =? ";
+		
+		try {
+			conn = db.getConnection();
+			ps= conn.prepareStatement(sql);
+			rs = ps.executeQuery();
+			
+			if(rs.next()){
+				item.setName(rs.getString(1));
+				item.setPrice(rs.getFloat(2));
+			}
+			
+						
+			ps.close();
+			rs.close();
+			conn.close();
 
-	public int getItemProductID(String text) {
-		
-		
-		
-		int productID = 0;
-		switch(text)
-		{
-		case "McChicken":
-			productID = 1;
-			break;
-		case "Ayam Goreng McD Spicy (2pcs)":
-			productID = 2;
-			break;
-		case "Ayam Goreng McD Spicy (5pcs)":
-			productID = 3;
-			break;
-		case "Spicy Chicken McDeluxe":
-			productID = 4;
-			break;
-		case "Chicken McNuggets (6pcs)":
-			productID = 5;
-			break;
-		case "Double Cheeseburger":
-			productID = 6;
-			break;
-		case "Big Mac":
-			productID = 7;
-			break;
-		case "Filet-O-Fish":
-			productID = 8;
-			break;
-		case "McChicken Meal (Medium)":
-			productID = 9;
-			break;
-		case "Chicken McNuggets 6pcs Meal (Medium)":
-			productID = 10;
-			break;
-		case "Filet-O-Fish Meal (Medium)":
-			productID = 11;
-			break;
-		case "Strawberry Sundae":
-			productID = 13;
-			break;
-		case "Chocolate Sundae":
-			productID = 14;
-			break;
+		} catch (SQLException | ClassNotFoundException e) {
+			
+			e.printStackTrace();
 		}
-		return productID;
-	}
 
+		return item;
+
+	}
 }

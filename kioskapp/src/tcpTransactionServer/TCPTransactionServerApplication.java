@@ -1,12 +1,12 @@
 package tcpTransactionServer;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import controller.OrderTransactionController;
 import kioskapp.ordertransaction.OrderTransaction;
 import kioskappException.InvalidCreditCardException;
 
@@ -37,15 +37,18 @@ public class TCPTransactionServerApplication {
 				
 				CreditCardAuthorization authorization = new CreditCardAuthorization();
 				authorization.validateCreditCardNo(creditCardNo);
+
+				orderTransaction.setTransactionStatus(true);
 			
-				
-				//write transaction detail into database
 				orderTransaction.setLast4Digits(Integer.parseInt
 						(creditCardNo.substring(creditCardNo.length() - 4)));
 				
+				//write transaction detail into database
+				OrderTransactionController transactionController = new OrderTransactionController ();
+				transactionController.insertTransaction(orderTransaction);
+				
 				//open an outputStream to send back transaction detail to order server
 				ObjectOutputStream outputStream = new ObjectOutputStream(clientSocket.getOutputStream());
-				outputStream.writeBoolean(true);
 				outputStream.writeObject(orderTransaction);
 				outputStream.flush();
 				
@@ -57,8 +60,8 @@ public class TCPTransactionServerApplication {
 				
 				//open an outputStream to send the error message to order server
 				ObjectOutputStream ObjectOutputStream = new ObjectOutputStream(clientSocket.getOutputStream());
-				ObjectOutputStream.writeBoolean(false);
-				ObjectOutputStream.writeUTF(e.toString());
+				
+				//orderTransaction.setTransactionStatus(false);
 				ObjectOutputStream.flush();
 				
 				//close outputStream

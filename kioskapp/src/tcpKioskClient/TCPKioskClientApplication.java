@@ -47,8 +47,8 @@ public class TCPKioskClientApplication {
 			//open an inputStream
 			ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
 
-			//read validation result from order server
-			boolean result = inputStream.readBoolean();
+			objectTransaction = (OrderTransaction)inputStream.readObject();
+			boolean result = objectTransaction.isTransactionStatus();
 		
 			kioskFrame.setTransactionStatus(result);
 			kioskFrame.release();
@@ -66,6 +66,9 @@ public class TCPKioskClientApplication {
 
 				//transaction details	
 			}
+			
+			
+			
 			} catch (InterruptedException | IOException | ClassNotFoundException e) {
 				kioskFrame.release();
 				e.printStackTrace();

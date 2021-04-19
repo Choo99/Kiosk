@@ -7,7 +7,12 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.List;
 
+import controller.ItemProductController;
+import controller.OrderController;
+import controller.OrderedItemController;
+import kioskapp.ordereditem.OrderedItem;
 import kioskapp.ordertransaction.OrderTransaction;
 
 public class TCPOrderServerApplication {
@@ -49,34 +54,32 @@ public class TCPOrderServerApplication {
 		transactionOutputStream.writeObject(orderTransaction);
 		transactionOutputStream.writeUTF(creditCardNo);
 		transactionOutputStream.flush();
-		
-		//open an inputStream to read result of authorization credit card
+	
+		//open an inputStream to read orderTransaction
 		ObjectInputStream transactionInputStream = new ObjectInputStream(transactionSocket.getInputStream());
-		boolean result = transactionInputStream.readBoolean();
+
+		//read transaction id that generate by transaction server
+		orderTransaction = (OrderTransaction)transactionInputStream.readObject();
+			
+		//insert order detail into database
+		OrderController orderController = new OrderController();
+		orderTransaction.setOrder(orderController.insertOrder(orderTransaction.getOrder(),orderTransaction.getOrderTransactionId()));
 		
-		
+		//insert ordered item into database
+		OrderedItemController orderedItemController = new OrderedItemController();
+		orderedItemController.insertOrderedItem(orderTransaction.getOrder());
+
+		ItemProductController itemProductController = new ItemProductController();
+		List<OrderedItem> products = orderTransaction.getOrder().getOrderedItems();
+		for(OrderedItem product:products){
+			product.setItemProduct(itemProductController.getProduct(product.getItemProduct().getItemProduct()));
+		}
+			
 		//open an outputStream to send transaction details to client side
 		ObjectOutputStream outputStream = new ObjectOutputStream(clientSocket.getOutputStream());
 
-		//write validation result to the client side
-		outputStream.writeBoolean(result);
-		if(result) {			
-			//read transaction id that generate by transaction server
-			orderTransaction = (OrderTransaction)transactionInputStream.readObject();
-			
-			//write data into database
-			
-			
-			//read order id from the database
-			
-			
-			//send transaction detail to client
-			outputStream.writeObject(orderTransaction);
-		}
-		else {
-			String errorMessage = transactionInputStream.readUTF();
-			outputStream.writeUTF(errorMessage);
-		}
+		//send transaction detail to client
+		outputStream.writeObject(orderTransaction);
 		outputStream.flush();
 		
 		//close all object

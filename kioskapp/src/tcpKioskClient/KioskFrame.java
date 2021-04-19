@@ -678,7 +678,10 @@ private static final long serialVersionUID = 1L;
 			
 			JLabel productName = (JLabel)panel.getComponent(3);
 			ItemProductController converter = new ItemProductController();
-			orderedItem.setOrderedItem(converter.getItemProductID(productName.getText()));
+
+			ItemProduct itemProduct = new ItemProduct();
+			itemProduct.setItemProduct(converter.getItemProductID(productName.getText()));
+			orderedItem.setItemProduct(itemProduct);
 			
 			JLabel quantity = (JLabel)panel.getComponent(7);
 			orderedItem.setQuantity(Integer.parseInt(quantity.getText()));
@@ -695,6 +698,7 @@ private static final long serialVersionUID = 1L;
 		OrderTransaction orderTransaction = new OrderTransaction();
 		orderTransaction.setOrder(order);
 		orderTransaction.setOrderMode(orderMode);
+		orderTransaction.setAmountCharged(totalPrice);
 		 
 		this.orderTransaction = orderTransaction;
 		
