@@ -11,6 +11,7 @@ import java.util.List;
 
 import controller.ItemProductController;
 import controller.OrderController;
+import controller.OrderTransactionController;
 import controller.OrderedItemController;
 import kioskapp.ordereditem.OrderedItem;
 import kioskapp.ordertransaction.OrderTransaction;
@@ -32,6 +33,8 @@ public class TCPOrderServerApplication {
 	
 	TCPOrderServerFrame frame = new TCPOrderServerFrame();
 	frame.setVisible(true);
+
+	int referenceNumber = 0;
 	
 	while(true) {
 		
@@ -62,19 +65,29 @@ public class TCPOrderServerApplication {
 		orderTransaction = (OrderTransaction)transactionInputStream.readObject();
 			
 		//insert order detail into database
-		OrderController orderController = new OrderController();
-		orderTransaction.setOrder(orderController.insertOrder(orderTransaction.getOrder(),orderTransaction.getOrderTransactionId()));
-		
-		//insert ordered item into database
-		OrderedItemController orderedItemController = new OrderedItemController();
-		orderedItemController.insertOrderedItem(orderTransaction.getOrder());
+		if(orderTransaction.isTransactionStatus()){
 
-		ItemProductController itemProductController = new ItemProductController();
-		List<OrderedItem> products = orderTransaction.getOrder().getOrderedItems();
-		for(OrderedItem product:products){
-			product.setItemProduct(itemProductController.getProduct(product.getItemProduct().getItemProduct()));
+			orderTransaction.getOrder().setOrderReferenceNumber(++referenceNumber);;
+
+			OrderController orderController = new OrderController();
+			orderTransaction.setOrder(orderController.insertOrder(orderTransaction.getOrder()));
+
+			//write transaction detail into database
+			OrderTransactionController transactionController = new OrderTransactionController ();
+			transactionController.insertTransaction(orderTransaction);
+		
+			//insert ordered item into database
+			OrderedItemController orderedItemController = new OrderedItemController();
+			orderedItemController.insertOrderedItem(orderTransaction.getOrder());
+
+			ItemProductController itemProductController = new ItemProductController();
+			List<OrderedItem> products = orderTransaction.getOrder().getOrderedItems();
+			for(OrderedItem product:products){
+				product.setItemProduct(itemProductController.getProduct(product.getItemProduct().getItemProduct()));
+			}
+
 		}
-			
+
 		//open an outputStream to send transaction details to client side
 		ObjectOutputStream outputStream = new ObjectOutputStream(clientSocket.getOutputStream());
 

@@ -23,13 +23,15 @@ public class OrderedItemController {
         ResultSet rs = null;
         int status =0;
        
-        String sql="INSERT INTO ordereditem (ItemProduct,Quantity,SubTotalAmount,Order) "+
+        String sql="INSERT INTO ordereditem (ItemProduct,Quantity,SubTotalAmount,`Order`) "+
         "VALUES (?,?,?,?);";
 
         try {
 		    conn = db.getConnection();
             ps = conn.prepareStatement(sql);
 
+
+            
             for (int i =0 ; i< order.getOrderedItems().size() ; i++){
         	
             	ps.setInt(1, order.getOrderedItems().get(i).getItemProduct().getItemProduct());
@@ -50,7 +52,7 @@ public class OrderedItemController {
         finally{
         
 				try {
-                         if (ps!= null)
+                        if (ps!= null)
                             ps.close();
                         if (rs!=null)
                             rs.close();

@@ -14,31 +14,30 @@ public class OrderController {
 		db = new DatabaseConnection();
 	}
 
-	//insert order into database
-	public Order insertOrder(Order order, int orderTransactionID){
+	//Insert order into database
+	public Order insertOrder(Order order){
 		
 		Connection conn = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		int status = 0;
     
-		String sql = "INSERT INTO order (OrderedItem,TotalAmount,OrderReferenceNumber,OrderTransaction) " +
-                 "VALUES (?,?,?,?)";
+		String sql = "INSERT INTO `Order` (TotalAmount,OrderReferenceNumber) " +
+                 "VALUES (?,?)";
 
         try {
 			    conn = db.getConnection();
                 ps = conn.prepareStatement(sql);
-                ps.setInt(1, order.getOrderedItems().size());
-                ps.setFloat(2, order.getTotalAmount());
-                ps.setInt(3, order.getOrderReferenceNumber());
-                ps.setInt(4, orderTransactionID);
+                ps.setFloat(1, order.getTotalAmount());
+                ps.setInt(2, order.getOrderReferenceNumber());
+               
 
                 status = ps.executeUpdate();
                 ps.close();
                 if(status!=0)
                 {
-                    sql ="SELECT OrderId FROM order;";
-                    ps = conn.prepareStatement(sql);
+                    sql ="SELECT OrderId FROM `Order`;";
+                    ps = conn.prepareStatement(sql,ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
                     rs = ps.executeQuery();
                     rs.last();
                     

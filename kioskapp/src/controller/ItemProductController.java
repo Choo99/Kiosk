@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 import kioskapp.itemproduct.ItemProduct;
 
@@ -65,6 +66,7 @@ public class ItemProductController {
 		try {
 			conn = db.getConnection();
 			ps= conn.prepareStatement(sql);
+			ps.setInt(1, itemProductId);
 			rs = ps.executeQuery();
 			
 			if(rs.next()){
@@ -83,6 +85,41 @@ public class ItemProductController {
 		}
 
 		return item;
+
+	}
+
+	public ArrayList<ItemProduct> getALLProduct ()
+	{
+		Connection conn = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		
+		ArrayList<ItemProduct> products = new ArrayList<ItemProduct>();
+		
+		String sql = "SELECT ItemProduct ,Name, Price FROM itemproduct";
+		
+		try {
+			conn = db.getConnection();
+			ps= conn.prepareStatement(sql);
+			rs = ps.executeQuery();
+			
+			while(rs.next()){
+				ItemProduct product = new ItemProduct();
+				product.setItemProduct(rs.getInt(1));
+				product.setName(rs.getString(2));
+				product.setPrice(rs.getFloat(3));
+				products.add(product);
+			}			
+			ps.close();
+			rs.close();
+			conn.close();
+
+		} catch (SQLException | ClassNotFoundException e) {
+			
+			e.printStackTrace();
+		}
+
+		return products;
 
 	}
 }

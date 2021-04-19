@@ -88,7 +88,7 @@ private static final long serialVersionUID = 1L;
 		this.setTitle("Kiosk Application");
 		this.setSize(width, height);
 		
-		cartListPanel = new JPanel(new GridLayout(10,1));
+		cartListPanel = new JPanel(new GridLayout(14,1));
 		paymentListPanel = new JPanel(new GridLayout(20,1));
 		paymentListPanel.setBackground(new Color(255, 250, 240));
 		
@@ -338,10 +338,10 @@ private static final long serialVersionUID = 1L;
 		image = listContent.setRescaledImages(image);
 		
 		productImgLabel.setIcon(image);
-		SpinnerModel model = new SpinnerNumberModel(1,1,10,1);
+		SpinnerModel model = new SpinnerNumberModel(1,1,100,1);
 		JSpinner quantity = new JSpinner(model);
 		//set JSpinner not editable
-		((DefaultEditor) quantity.getEditor()).getTextField().setEditable(false);
+		((DefaultEditor) quantity.getEditor()).getTextField().setEditable(true);
 		quantity.setPreferredSize(new Dimension(50,20));
 		JLabel productPriceLabel = new JLabel("RM " + format.format(product.getPrice()));
 		float total = product.getPrice() * (Integer)quantity.getValue();
