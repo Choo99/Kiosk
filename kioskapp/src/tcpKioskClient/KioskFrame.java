@@ -64,7 +64,7 @@ private static final long serialVersionUID = 1L;
 	// Private attribute for frame size setting
 	private int height =800;
 	private int width = 1000;
-	private JTable table;
+	private JPanel menu;
 	private JPanel cartListPanel;
 	private int cartIndex = 0;
 	private JPanel paymentListPanel;
@@ -74,7 +74,8 @@ private static final long serialVersionUID = 1L;
 	private JTabbedPane tabbedPanel;
 	private OrderTransaction orderTransaction;
 	private boolean transactionStatus;
-	private String orderMode; 
+	private String orderMode;
+	private String printMessage;
 
 	//private JPanel menuPanel;
 	//private JScrollPane menuScrollPanel;
@@ -88,8 +89,8 @@ private static final long serialVersionUID = 1L;
 		this.setTitle("Kiosk Application");
 		this.setSize(width, height);
 		
-		cartListPanel = new JPanel(new GridLayout(14,1));
-		paymentListPanel = new JPanel(new GridLayout(20,1));
+		cartListPanel = new JPanel(new GridLayout(3,1));
+		paymentListPanel = new JPanel();
 		paymentListPanel.setBackground(new Color(255, 250, 240));
 		
 		totalPriceLabel = new JLabel("RM 0.00");
@@ -104,10 +105,16 @@ private static final long serialVersionUID = 1L;
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);		
 		
 		//this.setResizable(false);
+		
+		//this.setFocusableWindowState(false);
 				
 		// Display component
 		loadComponent();
 		
+	}
+	
+	public void setPrintMessage(String message) {
+		printMessage = message;
 	}
 	
 	public void setTransactionStatus(boolean status) {
@@ -151,7 +158,6 @@ private static final long serialVersionUID = 1L;
 			
 			// Style list label
             listLabel.setFont(font);	
-			//listLabel.setBounds(424, 11, 161, 39);
             listLabel.setHorizontalAlignment(JLabel.CENTER);
 
             ListContent content = new ListContent();
@@ -160,39 +166,6 @@ private static final long serialVersionUID = 1L;
             productList = content.setProductList();
             images = content.setImages();
 			JPanel list = setMenuList(productList,images);
-
-			// Style the table
-           
-				
-           Object[][] rec = {
-
-                    {1, "McChicken", 8.1},
-					{2, "Ayam Goreng McD Spicy (2pcs)", 11.9},
-					{3, "Ayam Goreng McD Spicy (5pcs)", 30.2},
-                    {4, "Spicy Chicken McDeluxe", 11.9},
-                    {5, "Chicken McNuggets (6pcs)", 9.4},
-                    {6, "Double Cheeseburger", 9.45},
-                    {7, "Big Mac", 10.4},
-                    {8, "Filet-O-Fish", 8.45},
-                    {9, "McChicken Meal (Medium)", 13.2},
-                    {10, "Chicken McNuggets 6pcs Meal (Medium)", 13.2},
-                    {11, "Filet-O-Fish Meal (Medium)", 13},
-                    
-                    // Miss u missed no. 12 
-                    // GOTCHA
-                    {13, "Strawberry Sundae", 4.15},
-                    {14, "Chocolate Sundae", 4.15},
-                         };
-            String [] header = { "No.", "Item", "Price" };
-			
-			table = new JTable(rec,header);
-
-			table.setFont(new Font("Tahoma", Font.PLAIN, 13));
-			//table.setBounds(145, 48, 750, 326);
-            table.setRowHeight(23);
-            table.getColumnModel().getColumn(0).setPreferredWidth(35);
-            table.getColumnModel().getColumn(1).setPreferredWidth(275);
-            table.getColumnModel().getColumn(2).setPreferredWidth(35);
 			
 			// Add menu panel's components
 			menuPanel.add(BorderLayout.NORTH,listLabel);
@@ -203,15 +176,23 @@ private static final long serialVersionUID = 1L;
 	}
 	
 	private JPanel setMenuList(ArrayList<ItemProduct> productList,ArrayList<ImageIcon> images) {
-		JPanel menu = new JPanel(new GridLayout(10,3));
+	
+		//setting gridLayout size
+		int gridSize = 0;
+		if(productList.size() % 2 == 0) {gridSize = productList.size() / 2;}
+		else {gridSize = (productList.size() + 1) / 2;}
 
+		menu = new JPanel(new GridLayout(gridSize,1));
 		
 		for(int counter = 0;counter<productList.size();counter++) {
+			
+			//get product details and image 
 			ItemProduct itemProduct = productList.get(counter);
 			ImageIcon image = images.get(counter);
+			
+			//set product detail and image in JLabel 
 			JLabel productLabel = new JLabel(itemProduct.getName());
-			JLabel productImgLabel = new JLabel();
-			productImgLabel.setIcon(image);
+			JLabel productImgLabel = new JLabel(image);
 			JLabel productPriceLabel = new JLabel("RM" + format.format(itemProduct.getPrice()));
 			JButton addCartBtn = new JButton("Add Cart");
 			addCartBtn.setPreferredSize(new Dimension(100,40));	
@@ -221,10 +202,9 @@ private static final long serialVersionUID = 1L;
 			btnPanel.setPreferredSize(new Dimension(100,50));	
 			
 			JPanel allInOnePanel = new JPanel();
-			//GridLayout layout = new GridLayout();
-			BorderLayout layout = new BorderLayout();
-			allInOnePanel.setLayout(layout);
+			allInOnePanel.setLayout(new BorderLayout());
 			
+			//setting border of panel
 			Border border = BorderFactory.createLineBorder(new Color(70, 130, 180));
 			allInOnePanel.setBorder(BorderFactory.createTitledBorder(border,productLabel.getText()));
 			allInOnePanel.add(BorderLayout.CENTER,productImgLabel);
@@ -294,6 +274,7 @@ private static final long serialVersionUID = 1L;
 				tabbedPanel.setEnabledAt(0, false);
 				tabbedPanel.setEnabledAt(1, false);
 				tabbedPanel.setEnabledAt(2, false);
+				tabbedPanel.setEnabledAt(3, true);
 				tabbedPanel.setSelectedIndex(3);
 			}
 			
@@ -338,10 +319,10 @@ private static final long serialVersionUID = 1L;
 		image = listContent.setRescaledImages(image);
 		
 		productImgLabel.setIcon(image);
-		SpinnerModel model = new SpinnerNumberModel(1,1,100,1);
+		SpinnerModel model = new SpinnerNumberModel(1,1,10,1);
 		JSpinner quantity = new JSpinner(model);
 		//set JSpinner not editable
-		((DefaultEditor) quantity.getEditor()).getTextField().setEditable(true);
+		((DefaultEditor) quantity.getEditor()).getTextField().setEditable(false);
 		quantity.setPreferredSize(new Dimension(50,20));
 		JLabel productPriceLabel = new JLabel("RM " + format.format(product.getPrice()));
 		float total = product.getPrice() * (Integer)quantity.getValue();
@@ -377,6 +358,10 @@ private static final long serialVersionUID = 1L;
 		//add border to the panel
 		Border border = BorderFactory.createTitledBorder(" ");
 		panel.setBorder(border);
+		if(cartIndex > 3) {
+			GridLayout grid = new GridLayout(cartIndex,1);
+			cartListPanel.setLayout(grid);
+		}
 		cartListPanel.add(panel);
 		
 		addCartBtn.setEnabled(false);
@@ -403,6 +388,14 @@ private static final long serialVersionUID = 1L;
 				totalPriceLabel.setText("RM " +format.format(totalPrice));
 				refreshCartIndex();
 				addCartBtn.setEnabled(true);
+				if(cartIndex > 3) {
+					GridLayout grid = new GridLayout(cartIndex,1);
+					cartListPanel.setLayout(grid);
+				}
+				if(cartIndex == 0) {
+					tabbedPanel.setSelectedIndex(1);
+					tabbedPanel.setEnabledAt(2, false);
+				}
 				frame.revalidate();
 				frame.repaint();
 			}
@@ -525,12 +518,12 @@ private static final long serialVersionUID = 1L;
 	
 	private void setPaymentListPanel() {
 		Component[] components = cartListPanel.getComponents();
-		for(int count = 0; count<cartIndex;count++) {
+		for(int count = 0; count < cartIndex;count++) {
 			
 			JPanel panel = (JPanel)components[count];
 			JPanel newPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 			
-			JLabel noLabel = new JLabel(Integer.toString(count));
+			JLabel noLabel = new JLabel(Integer.toString(count + 1));
 			
 			JLabel productLabel = (JLabel)panel.getComponent(3);
 			JLabel newProductLabel = new JLabel(productLabel.getText());
@@ -559,6 +552,8 @@ private static final long serialVersionUID = 1L;
 			
 			newPanel.setBorder(BorderFactory.createTitledBorder(" "));
 			
+			GridLayout grid = new GridLayout(count + 1,1);
+			paymentListPanel.setLayout(grid);
 			paymentListPanel.add(newPanel);
 		}
 	}
@@ -751,6 +746,19 @@ private static final long serialVersionUID = 1L;
 		
 	}
 
+	public void resetMenuButton() {
+		//get all panel from menu panel
+		Component[] components = menu.getComponents();
+		//retrieve inner panel one by one until the buttonPanel
+		for(Component component : components) {
+			JPanel product = (JPanel)component;
+			JPanel cartPanel = (JPanel)product.getComponent(1);
+			JPanel btnPanel = (JPanel)cartPanel.getComponent(2);
+			JButton addCartBtn = (JButton)btnPanel.getComponent(0);
+			addCartBtn.setEnabled(true);
+		}
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		
@@ -760,15 +768,16 @@ private static final long serialVersionUID = 1L;
 			
 			waitForInput();
 			if(transactionStatus) {
-				JOptionPane.showMessageDialog(this,"Transact successfully! Please take your receipt");
+				JOptionPane.showMessageDialog(this,printMessage);
 				tabbedPanel.setSelectedIndex(0);
 				cartListPanel.removeAll();
 				paymentListPanel.removeAll();
+				resetMenuButton();
 			}
 			else {
 				JOptionPane.showMessageDialog(this,
-					    "Invalid Credit Card Number!",
-					    "Transaction Failed",
+					    printMessage,
+					    "Error",
 					    JOptionPane.WARNING_MESSAGE);
 			}
 		} catch (InterruptedException e1) {

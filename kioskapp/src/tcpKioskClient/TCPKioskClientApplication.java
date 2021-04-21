@@ -1,19 +1,12 @@
 package tcpKioskClient;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.List;
 
-import kioskapp.order.Order;
-import kioskapp.ordereditem.OrderedItem;
 import kioskapp.ordertransaction.OrderTransaction;
 
 public class TCPKioskClientApplication {
@@ -59,7 +52,7 @@ public class TCPKioskClientApplication {
 			{	
 				//take transaction id and order id as file name 
 				String targetSource = Integer.toString(orderTransaction.getOrderTransactionId()) + Integer.toString(orderTransaction.getOrder().getOrderId()) + ".txt";
-				
+				kioskFrame.setPrintMessage("Transact successfully! Please take your receipt");
 				//write receipt into text file
 				KioskReceipt receipt = new KioskReceipt ();
 				String receiptContent = receipt.writeReceiptContent(orderTransaction);
@@ -67,12 +60,16 @@ public class TCPKioskClientApplication {
 				fileWriter.write(receiptContent);
 				fileWriter.flush();
 				fileWriter.close();
-			
+			}
+			else {
+				kioskFrame.setPrintMessage("Invalid credit card number! Please try again");
 			}
 			
-			
-			
-			} catch (InterruptedException | IOException | ClassNotFoundException e) {
+			} catch (InterruptedException | ClassNotFoundException e) {
+				kioskFrame.release();
+				e.printStackTrace();
+			}catch (IOException e) {
+				kioskFrame.setPrintMessage("Server is not ready! Please inform technician");
 				kioskFrame.release();
 				e.printStackTrace();
 			}

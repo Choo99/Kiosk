@@ -57,7 +57,15 @@ public class KioskReceipt {
 
 		//credit card last 4 digits
 		receipt += "\r\nCredit Card No:**** **** **** ";
-		receipt += orderTransaction.getLast4Digits();
+		String creditCardNumber = Integer.toString(orderTransaction.getLast4Digits());
+		if(creditCardNumber.length() < 4) {
+			String zero ="";
+			for(int counter = 0; counter < 4 - creditCardNumber.length();counter++) {
+				zero += "0";
+			}
+			creditCardNumber = zero + creditCardNumber;
+		}
+		receipt += creditCardNumber;
 
 		//ending
 		 receipt+="\r\n"+"\r\n			Thank You!!Please Come Again!!!"+

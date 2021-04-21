@@ -5,15 +5,12 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 
-public class DatabaseConnection {
+public class AuthorizationdbConn {
 
 	private int portNo = 3307;
-	private String databaseName = "kioskappdb_dev";
+	private String databaseName = "creditcardauthorization";
 	private String username = "root";
 	private String password = "";
-	
-	
-
 	
     public Connection getConnection() throws ClassNotFoundException, SQLException 
     {

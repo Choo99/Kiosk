@@ -50,7 +50,7 @@ public class TCPOrderServerApplication {
 		
 		
 		//open a socket to send a request to transaction server
-		Socket transactionSocket = new Socket(InetAddress.getLocalHost(),4229);
+		Socket transactionSocket = new Socket(InetAddress.getLocalHost(),4230);
 		
 		//open an outputStream for transaction server
 		ObjectOutputStream transactionOutputStream = new ObjectOutputStream(transactionSocket.getOutputStream());
