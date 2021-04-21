@@ -12,7 +12,7 @@ public class KioskReceipt {
 		
 		String receipt = "-------------------------------------------------------"+
 						 "\n"+"          	Your Order Reference No is"+"\r\n"+
-						 "\r\n		     			";
+						 "\r\n\t\t\t";
 		// get reference number
 		receipt += orderTransaction.getOrder().getOrderReferenceNumber();
 		receipt +=	"\r\n"+"-------------------------------------------------------"+

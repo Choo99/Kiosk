@@ -46,7 +46,6 @@ public class TCPKioskClientApplication {
 		
 			kioskFrame.setTransactionStatus(result);
 			kioskFrame.release();
-		
 			// print receipt
 			if(result)
 			{	
@@ -65,15 +64,11 @@ public class TCPKioskClientApplication {
 				kioskFrame.setPrintMessage("Invalid credit card number! Please try again");
 			}
 			
-			} catch (InterruptedException | ClassNotFoundException e) {
-				kioskFrame.release();
-				e.printStackTrace();
-			}catch (IOException e) {
+			} catch (InterruptedException | ClassNotFoundException | IOException e) {
 				kioskFrame.setPrintMessage("Server is not ready! Please inform technician");
 				kioskFrame.release();
 				e.printStackTrace();
 			}
-		}
-			
+		}	
 	}
 }

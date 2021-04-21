@@ -9,6 +9,7 @@ import java.awt.Font;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 /**
@@ -23,7 +24,6 @@ public class TCPTransactionServerFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
 	
 	// Private components
-	private JLabel lblServerStatus;
 	private JTextArea txtRequestStatus;
 	
 	// Private dimension
@@ -37,20 +37,20 @@ public class TCPTransactionServerFrame extends JFrame {
 		
 		// Default frame setting
 		getContentPane().setLayout(new BorderLayout());
-		this.setTitle("TCP Application: Server Side");
+		this.setTitle("TCP Application: Transaction Server Side");
 		this.setSize(new Dimension(width, height));  
 		
 		// Must close on X
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setResizable(false);
+		
 		// Center the frame on the screen
         this.setLocationRelativeTo(null);
  
-		// Initialize component
-		this.lblServerStatus = new JLabel ("-");
+		
 		// Row, Column
 		this.txtRequestStatus  = new JTextArea(20, 60);
-		txtRequestStatus.setBackground(new Color(51, 255, 255));
+		txtRequestStatus.setBackground(new Color(240, 255, 240));
 		// Load more component
 		loadComponent();
 		
@@ -70,20 +70,18 @@ public class TCPTransactionServerFrame extends JFrame {
 		
 		// Components to display server's status
 		JPanel panel = new JPanel();
-		panel.setBackground(new Color(102, 255, 255));
-		JLabel lblServer = new JLabel ("Server status: ");
+		panel.setBackground(new Color(240, 255, 240));
+		JLabel lblServer = new JLabel ("Transaction Server");
 		
 		// Style the components
-		lblServer.setFont(font);
-		lblServerStatus.setFont(font);
-		lblServer.setBackground(new Color(102, 255, 255));
+		lblServer.setFont(font);		
+		lblServer.setBackground(new Color(240, 255, 240));
 		lblServer.setOpaque(true);
-		lblServerStatus.setBackground(new Color(102, 255, 255));
-		lblServerStatus.setOpaque(true);
+		
 
 		// Organize component into the panel
 		panel.add(lblServer);
-		panel.add(lblServerStatus);
+		
 		
 		return panel;
 		
@@ -100,7 +98,7 @@ public class TCPTransactionServerFrame extends JFrame {
 		
 		// Component to display request's status
 		JPanel panel = new JPanel();
-		panel.setBackground(new Color(102, 255, 255));
+		panel.setBackground(new Color(240, 255, 240));
 
 		// Set default message when the frame launch for the first time
 		txtRequestStatus.setText("\r\n > Server is running");
@@ -109,9 +107,9 @@ public class TCPTransactionServerFrame extends JFrame {
 		// Styling the request text
 		txtRequestStatus.setFont(new Font("Serif", Font.PLAIN, 15));
 
-
+		JScrollPane scrollPane = new JScrollPane(txtRequestStatus);
 		// Add component to panel
-		panel.add(txtRequestStatus);
+		panel.add(scrollPane);
 		
 		return panel;
 		
@@ -136,21 +134,7 @@ public class TCPTransactionServerFrame extends JFrame {
 		
 	}
 	
-	/**
-	 * This method update the status of the server
-	 * 
-	 * @param flag: status of the server
-	 */
-	public void updateServerStatus(boolean flag) {
-		
-		String status = "Waiting for connection.";
-		
-		if (flag)
-			status = "Received connection";
-		
-		this.lblServerStatus.setText(status);
-		
-	}
+	
 	
 	/**
 	 * This method update the status of the request sent to the client
