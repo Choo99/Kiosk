@@ -1,8 +1,10 @@
-package kioskapp.ordereditem;
+package model.kioskapp.orderedItem;
 
 import java.io.Serializable;
 
-import kioskapp.itemproduct.ItemProduct;
+import model.kioskapp.itemproduct.ItemProduct;
+
+
 
 /**
  * 

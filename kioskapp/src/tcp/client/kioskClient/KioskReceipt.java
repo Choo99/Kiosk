@@ -1,13 +1,16 @@
-package tcpKioskClient;
+package tcp.client.kioskClient;
 
+import model.kioskapp.orderedItem.OrderedItem;
+import model.kioskapp.ordertransaction.OrderTransaction;
 
-
-import kioskapp.ordereditem.OrderedItem;
-import kioskapp.ordertransaction.OrderTransaction;
+/**
+ * This class will write receipt into txt file
+ * @author User
+ *
+ */
 
 public class KioskReceipt {
 	
-
 	public String writeReceiptContent(OrderTransaction orderTransaction) {
 		
 		String receipt = "-------------------------------------------------------"+

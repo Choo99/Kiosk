@@ -6,7 +6,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-import kioskapp.itemproduct.ItemProduct;
+import model.kioskapp.itemproduct.ItemProduct;
+
 
 public class ItemProductController {
 
@@ -16,7 +17,6 @@ public class ItemProductController {
 		db = new DatabaseConnection();
 	}
 
-	@SuppressWarnings("null")
 	public int getItemProductID (String productName) {
 		Connection conn = null;
 		PreparedStatement ps = null;
@@ -88,7 +88,7 @@ public class ItemProductController {
 
 	}
 
-	public ArrayList<ItemProduct> getALLProduct ()
+	public ArrayList<ItemProduct> getAllProduct ()
 	{
 		Connection conn = null;
 		PreparedStatement ps = null;

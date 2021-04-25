@@ -1,16 +1,16 @@
-package tcpKioskClient;
+package tcp.client.kioskClient;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 
 import javax.imageio.ImageIO;
-import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -29,119 +29,138 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 
-import javax.swing.JTable;
-import javax.swing.JTextField;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 
-import kioskapp.itemproduct.ItemProduct;
-import kioskapp.order.Order;
-import kioskapp.ordereditem.OrderedItem;
-import kioskapp.ordertransaction.OrderTransaction;
-
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.MaskFormatter;
 
 import controller.ItemProductController;
+import model.kioskapp.itemproduct.ItemProduct;
+import model.kioskapp.order.Order;
+import model.kioskapp.orderedItem.OrderedItem;
+import model.kioskapp.ordertransaction.OrderTransaction;
 
 public class KioskFrame extends JFrame implements ActionListener{
 
-private static final long serialVersionUID = 1L;
-	private JTextField creditCardNo ;
+	private static final long serialVersionUID = 1L;
+
+	// Attribute used to format the float to 2 decimal point
 	private static DecimalFormat format = new DecimalFormat("0.00");
 
 
 	// Private attribute for frame size setting
 	private int height =800;
 	private int width = 1000;
+	
+	private JTabbedPane tabbedPanel;
+	
 	private JPanel menu;
 	private JPanel cartListPanel;
-	private int cartIndex = 0;
 	private JPanel paymentListPanel;
-	private float totalPrice = 0;
+	
 	private JLabel totalPriceLabel;
 	private JLabel priceLabel;
-	private JTabbedPane tabbedPanel;
+	
+	private JFormattedTextField creditCardNo;
+	//private JTextField creditCardNo;
+	
 	private OrderTransaction orderTransaction;
+	
+	private int cartIndex = 0;
+	
+	private float totalPrice = 0;
 	private boolean transactionStatus;
 	private String orderMode;
 	private String printMessage;
-
-	//private JPanel menuPanel;
-	//private JScrollPane menuScrollPanel;
 	
 	/**
-	 * Create the frame.
+	 * Create the frame	
 	 */
 	public KioskFrame() {
 		
-		//getContentPane().setLayout(new BorderLayout());
-		this.setTitle("Kiosk Application");
-		this.setSize(width, height);
+		// Style the frame
+		setTitle("Kiosk Application");
+		setSize(width, height);
 		
+		// Initial component
 		cartListPanel = new JPanel(new GridLayout(3,1));
 		paymentListPanel = new JPanel(new GridLayout(3,1));
-		
-		paymentListPanel.setBackground(new Color(255, 250, 240));
+		totalPriceLabel = new JLabel("RM 0.00");
+		creditCardNo = new JFormattedTextField(createFormatter("################"));
+
+		// Initial print message for detect error purpose
 		printMessage = "I am default message";
 		
-		totalPriceLabel = new JLabel("RM 0.00");
-		//menuPanel = new JPanel(new BorderLayout());
-		
-		//menuScrollPanel = new JScrollPane();
+		// Style the component
+		paymentListPanel.setBackground(new Color(255, 250, 240));
 		
 		// Center the frame on the screen
         this.setLocationRelativeTo(null);		
 		
-		// Must close on X
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);		
+		// Frame must close on X
+		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		//this.setResizable(false);
-		
-		//this.setFocusableWindowState(false);
+		// Frame cannot be resize
+		this.setResizable(false);
 				
 		// Display component
 		loadComponent();
 		
 	}
 	
+
+	/**
+	 * This method set the printed message to show the result
+	 * @param message
+	 */
 	public void setPrintMessage(String message) {
 		printMessage = message;
 	}
 	
+	/**
+	 *  This method set the status of validation result
+	 * @param status
+	 */
 	public void setTransactionStatus(boolean status) {
 		transactionStatus = status;
 	}
 	
+	/**
+	 *  This method get the credit card number from JTextField
+	 * @return
+	 */
 	public String getCreditCardNumber() {
 		return creditCardNo.getText();
 	}
 	
-	public void waitTime() throws InterruptedException {
-		synchronized(this) {
-			wait(5000);
-		}
-	}
 	
+	/**
+	 *  This method freeze the thread to wait for user input
+	 * @throws InterruptedException
+	 */
 	public void waitForInput() throws InterruptedException {
 		synchronized(this) {
 			wait();
 		}
 	}
 	
+	/**
+	 *  This method would release the freeze thread
+	 * @throws InterruptedException
+	 */
 	public void release() throws InterruptedException {
 		synchronized(this) {
 			notifyAll();
@@ -149,12 +168,19 @@ private static final long serialVersionUID = 1L;
 	}
 	
 	
-	//Return result
+	/**
+	 *  This method will return order transaction result
+	 * @return object orderTransaction
+	 */
 	public OrderTransaction getOrderTransaction() {
 		return this.orderTransaction;
 	}
 	
-	// To return menu panel 
+	/**
+	 *  This method will return menuPanel after initialize all the component 
+	 * @param font
+	 * @return menuPanel
+	 */
 	private JPanel getMenuPanel(Font font)
 	{
 			JPanel menuPanel = new JPanel();
@@ -170,6 +196,7 @@ private static final long serialVersionUID = 1L;
 				e.printStackTrace();
 			}
 			listLabel.setIcon(icon);
+			
 			// Style the menu panel
         	menuPanel.setBackground(Color.white);
             menuPanel.setLayout(new BorderLayout());
@@ -178,46 +205,57 @@ private static final long serialVersionUID = 1L;
             listLabel.setFont(font);	
             listLabel.setHorizontalAlignment(JLabel.CENTER);
             
-            //add list label to panel
+            // Add list label to a panel is easier to manage
             JPanel lblPanel = new JPanel();
             lblPanel.add(listLabel);
             lblPanel.add(Box.createRigidArea(new Dimension(0,60)));
 			lblPanel.setBackground(new Color(255, 248, 220));
 
+			// Get the product list from database and load the corresponding images
             ListContent content = new ListContent();
             ArrayList<ItemProduct> productList = new ArrayList<ItemProduct>();
             ArrayList<ImageIcon> images = new ArrayList<ImageIcon>();
             productList = content.setProductList();
             images = content.setImages();
-			JPanel list = setMenuList(productList,images);
-			
+			setMenuList(productList,images);
 			
 			// Add menu panel's components
 			menuPanel.add(BorderLayout.NORTH,lblPanel);
 			menuPanel.add(Box.createRigidArea(new Dimension(0,100)));
-			JScrollPane menuScrollPanel = new JScrollPane(list);
+			JScrollPane menuScrollPanel = new JScrollPane(menu);
 			menuPanel.add(BorderLayout.CENTER,menuScrollPanel);
 
 			return menuPanel;
 	}
 	
-	private JPanel setMenuList(ArrayList<ItemProduct> productList,ArrayList<ImageIcon> images) {
+	/**
+	 * This method will set the detail's of menuListPanel before adding into menuPanel
+	 * @param productList
+	 * @param images
+	 */
+	private void setMenuList(ArrayList<ItemProduct> productList,ArrayList<ImageIcon> images) {
 	
-		//setting gridLayout size
+		/**
+		 * Set the gridLayout size of menuList
+		 * In order to get the arrangement of gridLayout fill from left to right and top to down
+		 * GridLayout x-axis should half the productList size
+		 * Odd number will plus one to get the actual half of size
+		 */
 		int gridSize = 0;
 		if(productList.size() % 2 == 0) {gridSize = productList.size() / 2;}
 		else {gridSize = (productList.size() + 1) / 2;}
 
+		// Set and style menu layout
 		menu = new JPanel(new GridLayout(gridSize,1));
-	
+		menu.setBackground(Color.WHITE);
 
 		for(int counter = 0;counter<productList.size();counter++) {
 			
-			//get product details and image 
+			// Get product details and image 
 			ItemProduct itemProduct = productList.get(counter);
 			ImageIcon image = images.get(counter);
 			
-			//set product detail and image in JLabel 
+			// Set product detail and image in JLabel 
 			JLabel productLabel = new JLabel(itemProduct.getName());
 			productLabel.setFont(new Font("Dialog", Font.BOLD, 30));
 			
@@ -234,13 +272,17 @@ private static final long serialVersionUID = 1L;
 			allInOnePanel.setBackground(Color.WHITE);
 		
 			
-			//setting border of panel
+			/**
+			* Setting border of all in one panel
+			* This panel is used to display product image with product name at the border
+			*/
 			Border border = BorderFactory.createLineBorder(new Color(70, 130, 180));
 			allInOnePanel.setBorder(BorderFactory.createTitledBorder
 					(border, productLabel.getText(), TitledBorder.LEFT, TitledBorder.DEFAULT_POSITION,new Font("Dialog", Font.BOLD, 16)));
 			allInOnePanel.add(BorderLayout.CENTER,productImgLabel);
 			productImgLabel.setHorizontalAlignment(JLabel.CENTER);
 			
+			// Second panel is used to display product's price and addChart button
 			JPanel secondPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 			secondPanel.setBackground(Color.white);
 			Border secondBorderLine = BorderFactory.createMatteBorder(1, 0, 0, 0, new Color(70, 130, 180));
@@ -250,11 +292,17 @@ private static final long serialVersionUID = 1L;
 			secondPanel.add(Box.createRigidArea(new Dimension(200 - addCartBtn.getPreferredSize().width,0)));
 			secondPanel.add(addCartBtn);
 			
-
+			// Add second panel into South of all in one panel
 			allInOnePanel.add(BorderLayout.SOUTH,secondPanel);
 			menu.add(allInOnePanel);
 			
 			KioskFrame frame = this;
+			
+			/**
+			 * addCartBtn will add the detail's of that product panel to cartListPanel
+			 * addCartBtn will disable when the selected item is in the cartListPanel
+			 * repaint and revalidate to refresh the frame
+			 */
 			addCartBtn.addActionListener(new ActionListener() {
 
 				public void actionPerformed(ActionEvent e) {
@@ -266,18 +314,21 @@ private static final long serialVersionUID = 1L;
 				
 			});
 		}
-		menu.setBackground(Color.WHITE);
-		return menu;
+		
 	}
 
-	// To return cart panel
+	/**
+	 *  This method will set cart panel
+	 * @param font
+	 * @return JPanel cartPanel
+	 */
 	private JPanel getCartPanel(Font font)
 	{
 
 		JPanel cartPanel = new JPanel(new BorderLayout());
 
-		// cart panel component object
-		creditCardNo = new JTextField ();
+		// Cart panel's component object
+		JButton processPaymentBtn = new JButton ("Process Payment");
  		JLabel orderedList = new JLabel("Ordered List");
  		ImageIcon icon = null;
 		try {
@@ -287,27 +338,56 @@ private static final long serialVersionUID = 1L;
 			e.printStackTrace();
 		}
 		orderedList.setIcon(icon);
-		
-		JButton processPayment = new JButton ("Process Payment");
-
+	
 		// Style cart panel
 		cartListPanel.setBackground(Color.white);
-	
-		// Style credit card textField
-		creditCardNo.setFont(font);		
-
+		
         // Style ordered list       
         orderedList.setFont(font);
 		orderedList.setBackground(Color.white);
  		orderedList.setHorizontalAlignment(JLabel.CENTER);
 
 		// Style the process payment button
-		processPayment.setFont(font);
+		processPaymentBtn.setFont(font);
 		
-		processPayment.addActionListener(new ActionListener() {
+		// Create a panel to display the title of cart panel
+		JPanel labelPanel = new JPanel();
+		labelPanel.add(Box.createRigidArea(new Dimension(0,60)));
+		labelPanel.setBackground(new Color(255, 248, 220));
+		labelPanel.add(orderedList);
+		
+		JScrollPane scrollPanel = new JScrollPane(cartListPanel);
+		
+		/** 
+		* This panel will display the total price 
+		* and contain process payment button	
+		*/	
+		JPanel pricePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		pricePanel.setBackground(Color.white);
+		
+		JLabel totalLabel = new JLabel("Total Price : ");
 
+		// Style the component	
+		totalPriceLabel.setFont(font);
+		totalLabel.setFont(font);
+			
+		pricePanel.add(totalLabel);
+		pricePanel.add(Box.createRigidArea(new Dimension(5,50)));
+		pricePanel.add(totalPriceLabel);
+		pricePanel.add(Box.createRigidArea(new Dimension(5,0)));
+		pricePanel.add(processPaymentBtn);
+
+		// Add all components to panel
+		cartPanel.add(BorderLayout.NORTH,labelPanel);
+		cartPanel.add(BorderLayout.CENTER,scrollPanel);
+		cartPanel.add(BorderLayout.SOUTH,pricePanel);
+
+		/**
+		 * processPaymentBtn will add the component inside cartListPanel into paymentListPanel
+		 * Disable all other tabs and jump to payment tab
+		 */
+		processPaymentBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-
 				setPaymentListPanel();
 				priceLabel.setText("RM " + format.format(totalPrice));
 				tabbedPanel.setEnabledAt(0, false);
@@ -316,85 +396,69 @@ private static final long serialVersionUID = 1L;
 				tabbedPanel.setEnabledAt(3, true);
 				tabbedPanel.setSelectedIndex(3);
 			}
-			
 		});
 		
-		JPanel labelPanel = new JPanel();
-		labelPanel.add(Box.createRigidArea(new Dimension(0,60)));
-		labelPanel.setBackground(new Color(255, 248, 220));
-		labelPanel.add(orderedList);
-		
-		JScrollPane scrollPanel = new JScrollPane(cartListPanel);
-				
-		JPanel pricePanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-		
-		JLabel totalLabel = new JLabel("Total Price : ");		
-		totalPriceLabel.setFont(font);
-		totalLabel.setFont(font);
-		totalLabel.setVerticalTextPosition(1);
-		creditCardNo.setPreferredSize(new Dimension(300,50));
-		pricePanel.setBackground(Color.white);
-		
-		pricePanel.add(totalLabel);
-		pricePanel.add(Box.createRigidArea(new Dimension(5,50)));
-		pricePanel.add(totalPriceLabel);
-		pricePanel.add(Box.createRigidArea(new Dimension(5,0)));
-		pricePanel.add(processPayment);
-
-		// Add all components to panel
-		cartPanel.add(BorderLayout.NORTH,labelPanel);
-		cartPanel.add(BorderLayout.CENTER,scrollPanel);
-		cartPanel.add(BorderLayout.SOUTH,pricePanel);
-
-		
-		
 		return cartPanel;
-		
 	}
 	
+	/**
+	 *  This method will add detail's of product into cartList
+	 * @param product
+	 * @param image
+	 * @param addCartBtn
+	 */
 	public void setCartListPanel(ItemProduct product,ImageIcon image,JButton addCartBtn) {
+		
 		JLabel noLabel = new JLabel(Integer.toString(++cartIndex));
-
 		JLabel productLabel = new JLabel(product.getName());
 		JLabel productImgLabel = new JLabel();
-		//rescaled image
+		
+		// Rescaled image
 		ListContent listContent = new ListContent();
 		image = listContent.setRescaledImages(image);
 		
 		productImgLabel.setIcon(image);
 		SpinnerModel model = new SpinnerNumberModel(1,1,10,1);
-		JSpinner quantity = new JSpinner(model);
+		JSpinner quantitySpinner = new JSpinner(model);
 		
-		//set JSpinner not editable
-		((DefaultEditor) quantity.getEditor()).getTextField().setEditable(false);
-		quantity.setPreferredSize(new Dimension(50,20));
+		// Set JSpinner not editable
+		((DefaultEditor) quantitySpinner.getEditor()).getTextField().setEditable(false);
+		quantitySpinner.setPreferredSize(new Dimension(50,20));
 		JLabel productPriceLabel = new JLabel("RM " + format.format(product.getPrice()));
-		float total = product.getPrice() * (Integer)quantity.getValue();
+		float total = product.getPrice() * (Integer)quantitySpinner.getValue();
+		
 		totalPrice += total;
 		totalPriceLabel.setText("RM " + format.format(totalPrice));
 		JLabel subtotalPriceLabel = new JLabel(format.format(total));
+		
+		/** Create remove button
+		* This button will remove the repesctive row from the chart list
+		*/
 		JButton removeBtn = new JButton("Remove");
 		removeBtn.setPreferredSize(new Dimension(100,40));	
 		
+		// This panel is to hold removeBtn
 		JPanel btnPanel = new JPanel();
 		btnPanel.add(removeBtn);
 		btnPanel.setPreferredSize(new Dimension(100,50));	
 		btnPanel.setOpaque(false);
 		
+		/** 
+		* This panel is to display the ordered item's list
+		* Each row of list includes numbering, product name, product image, quantity, original price
+		* subtotal with a remove button
+		*/
 		JPanel panel = new JPanel();
 		panel.setBackground(Color.white);
-
-		FlowLayout layout = new FlowLayout(FlowLayout.LEFT);
-		panel.setLayout(layout);
-
+		panel.setLayout(new FlowLayout(FlowLayout.LEFT));
 		panel.add(Box.createRigidArea(new Dimension(3 - noLabel.getPreferredSize().width,0)));
 		panel.add(noLabel);
 		panel.add(Box.createRigidArea(new Dimension(300 - productLabel.getPreferredSize().width,0)));
 		panel.add(productLabel);
 		panel.add(Box.createRigidArea(new Dimension(200 - productImgLabel.getPreferredSize().width,0)));
 		panel.add(productImgLabel);
-		panel.add(Box.createRigidArea(new Dimension(100 - quantity.getPreferredSize().width,0)));
-		panel.add(quantity);
+		panel.add(Box.createRigidArea(new Dimension(100 - quantitySpinner.getPreferredSize().width,0)));
+		panel.add(quantitySpinner);
 		panel.add(Box.createRigidArea(new Dimension(100 - productPriceLabel.getPreferredSize().width,0)));
 		panel.add(productPriceLabel);
 		panel.add(Box.createRigidArea(new Dimension(100 - subtotalPriceLabel.getPreferredSize().width,0)));
@@ -402,21 +466,27 @@ private static final long serialVersionUID = 1L;
 		panel.add(Box.createRigidArea(new Dimension(200 - btnPanel.getPreferredSize().width,0)));
 		panel.add(btnPanel);
 		
-		//add border to the panel
+		// Add border to the panel
 		Border border = BorderFactory.createTitledBorder(" ");
 		panel.setBorder(border);
+		
+		// GridLayout size will grow as item in the cart list is more than three
 		if(cartIndex > 3) {
 			GridLayout grid = new GridLayout(cartIndex,1);
 			cartListPanel.setLayout(grid);
 		}
 		cartListPanel.add(panel);
 		
+		// Disable the addCartBtn of the selected item at the menu panel 
 		addCartBtn.setEnabled(false);
 		
-		quantity.addChangeListener(new ChangeListener() {
-
+		/**
+		 * As quantity of spinner changed, subtotal of item and total amount of order will change immediately
+		 * Minus the previous total and add the current total to get the actual number
+		 */
+		quantitySpinner.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				float newTotal = product.getPrice() * (Integer)quantity.getValue();
+				float newTotal = product.getPrice() * (Integer)quantitySpinner.getValue();
 				float oldTotal = Float.parseFloat(subtotalPriceLabel.getText());
 				subtotalPriceLabel.setText(format.format(newTotal));
 				totalPrice += newTotal - oldTotal;
@@ -425,12 +495,21 @@ private static final long serialVersionUID = 1L;
 		});
 		
 		KioskFrame frame = this;
+		
+		/**
+		 * removeBtn will remove panel of the selected product from cartListPanel
+		 * Minus counter of cartIndex 
+		 * Calculate new amount of order after entire product remove from list
+		 * Refresh counter of product in the list
+		 * Set enable to corresponding addCartBtn in the menuList
+		 * Cart tab will disable and jump to menu tab when all product in cartList has been removed
+		 */
 		removeBtn.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
 				cartListPanel.remove(panel);
 				cartIndex--;
-				float newTotal = product.getPrice() * (Integer)quantity.getValue();
+				float newTotal = product.getPrice() * (Integer)quantitySpinner.getValue();
 				totalPrice -= newTotal ;
 				totalPriceLabel.setText("RM " +format.format(totalPrice));
 				refreshCartIndex();
@@ -450,14 +529,17 @@ private static final long serialVersionUID = 1L;
 		});
 	}
 	
+	/**
+	 * This method will return paymentPanel
+	 * @param font
+	 * @return JPanel paymentPanel
+	 */
 	private JPanel getPaymentPanel(Font font) {
 		
 		JPanel paymentPanel = new JPanel(new BorderLayout());
 		paymentPanel.setBackground(new Color(255, 248, 220));
-		
-		//JPanel paymentDetailPanel = new JPanel();
-		
-		
+
+		// Create paymentPanel components	
 		JLabel paymentLabel = new JLabel("Payment");
 		ImageIcon icon = null;
 		try {
@@ -468,18 +550,24 @@ private static final long serialVersionUID = 1L;
 		}
 		paymentLabel.setIcon(icon);
 		
+		// Style component
 		paymentLabel.setFont(font);
 		paymentLabel.setHorizontalAlignment(JLabel.CENTER);
 		
+		// This panel is to hold the title of this tab 
 		JPanel labelPanel = new JPanel();
 		labelPanel.setOpaque(false);
 		labelPanel.add(paymentLabel);
 		labelPanel.add(Box.createRigidArea(new Dimension(0,60)));
-
+		
+		/** nestedTotalPanel avoid the totalPanel fill itself to the whole East 
+		*   of payementPanel which looks very ugly
+		*/
 		JPanel totalPanel = getTotalPanel(font);
 		JPanel nestedTotalPanel = new JPanel();
 		nestedTotalPanel.setOpaque(false);
 		
+		// This panel is to display decoration image 
 		JPanel imagePanel = new JPanel();
 		imagePanel.setOpaque(false);
 		ImageIcon imageIcon = null;
@@ -510,64 +598,67 @@ private static final long serialVersionUID = 1L;
 		nestedTotalPanel.add(totalPanel);
 		JScrollPane scrollPanel = new JScrollPane(paymentListPanel);
 		scrollPanel.setBackground(Color.white);
-		//paymentDetailPanel.add(scrollPanel);
-		//paymentDetailPanel.add(totalPanel);
 		
 		paymentPanel.add(BorderLayout.NORTH,labelPanel);
-
-		//paymentPanel.add(BorderLayout.CENTER,paymentDetailPanel);
 		paymentPanel.add(BorderLayout.CENTER,scrollPanel);
 		paymentPanel.add(BorderLayout.EAST,nestedTotalPanel);
 		paymentPanel.add(BorderLayout.SOUTH,imagePanel);
 		return paymentPanel;
 	}
 	
+	/**
+	 * This method return totalPanel that contain totalPriceLabel, creditCardNo JTextField
+	 * and confirmBtn, backBtn
+	 * @param font
+	 * @return JPanel totalPanel
+	 */
 	private JPanel getTotalPanel(Font font) {
+		
 		JPanel totalPanel = new JPanel();
+
+		// Style the panel
 		totalPanel.setLayout(new BoxLayout(totalPanel,BoxLayout.Y_AXIS));
 		totalPanel.setBackground(Color.white);
 		
+		// Panel components
 		JLabel orderSummaryLabel = new JLabel("Order Summary");
 		JLabel totalPriceLabel = new JLabel("Total: ");
-		
-		priceLabel = new JLabel("RM " + format.format(totalPrice));
-		
+		JLabel creditCardNoLabel = new JLabel("Credit Card Number: ");
 		JLabel tax = new JLabel("(included GST)");
-		tax.setHorizontalAlignment(JLabel.CENTER);
-		
-		creditCardNo = new JTextField("Credit Card Number");
-		
 		JButton confirmBtn = new JButton("Confirm");
 		JButton backBtn = new JButton("Back");
+		priceLabel = new JLabel("RM " + format.format(totalPrice));
 		
-		//styling all component
+		// Styling all component
 		orderSummaryLabel.setFont(font);
 		totalPriceLabel.setFont(font);
 		priceLabel.setFont(font);
 		tax.setFont(new Font("Yu Mincho Light", Font.ITALIC, 15));
+		tax.setHorizontalAlignment(JLabel.CENTER);
 		creditCardNo.setFont(new Font("Yu Mincho Light", Font.ITALIC, 15));
 		creditCardNo.setForeground(Color.GRAY);
 		confirmBtn.setFont(font);
 		backBtn.setFont(font);
-		
+		creditCardNoLabel.setFont(new Font("Yu Mincho Light", Font.PLAIN, 24));
 		
 		JPanel orderSummary = new JPanel();
 		orderSummary.setOpaque(false);
-		//orderSummary.setBackground(Color.white);
 		orderSummary.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.BLACK));
 		orderSummary.add(orderSummaryLabel);
 		
 		JPanel pricePanel = new JPanel();
 		pricePanel.setOpaque(false);
-		//pricePanel.setBackground(Color.white);
 		pricePanel.add(totalPriceLabel);
 		pricePanel.add(priceLabel);
+		
+		JPanel creditCardLabelPanel = new JPanel();
+		creditCardLabelPanel.setOpaque(false);
+		creditCardLabelPanel.add(creditCardNoLabel);
 		
 		JPanel creditCardPanel = new JPanel();
 		creditCardPanel.setOpaque(false);
 		creditCardNo.setPreferredSize(new Dimension(210,30));
 		creditCardPanel.add(creditCardNo);
-		//creditCardPanel.setBackground(Color.white);
 		
 		JPanel confirmBtnPanel = new JPanel();
 		confirmBtnPanel.setOpaque(false);
@@ -583,29 +674,17 @@ private static final long serialVersionUID = 1L;
 		totalPanel.add(orderSummary);
 		totalPanel.add(pricePanel);
 		totalPanel.add(tax);
+		totalPanel.add(creditCardLabelPanel);
 		totalPanel.add(creditCardPanel);
 		totalPanel.add(confirmBtnPanel);
 		totalPanel.add(backBtnPanel);
 		totalPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		
-		creditCardNo.addFocusListener(new FocusListener() {
-
-			public void focusGained(FocusEvent e) {
-		
-				creditCardNo.setText("");
-			}
-
-			public void focusLost(FocusEvent e) {
-				if(creditCardNo.getText() == "")
-				creditCardNo.setText("Credit Card Number");
-			}
-		});
-		
-		creditCardNo.getDocument().addDocumentListener(new DocumentListener() {
-
+		// This listener will disable confirm button if the creditCardNo is not 16 digit
+		creditCardNo.getDocument().addDocumentListener(new DocumentListener(){
 			@Override
 			public void insertUpdate(DocumentEvent e) {
-				if(e.getDocument().getLength()==16){
+				if(creditCardNo.getText().replaceAll("[^0-9.]", "").length() == 16) {
 					confirmBtn.setEnabled(true);
 				}
 				else {
@@ -615,7 +694,7 @@ private static final long serialVersionUID = 1L;
 
 			@Override
 			public void removeUpdate(DocumentEvent e) {
-				if(e.getDocument().getLength()==16){
+				if(creditCardNo.getText().replaceAll("[^0-9]", "").length() == 16) {
 					confirmBtn.setEnabled(true);
 				}
 				else {
@@ -624,12 +703,10 @@ private static final long serialVersionUID = 1L;
 			}
 
 			@Override
-			public void changedUpdate(DocumentEvent e) {
-	
-			}
-			
+			public void changedUpdate(DocumentEvent e) {}
 		});
-		
+
+		// This button is to leave the payment tab and back to cart tab
 		backBtn.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
@@ -642,11 +719,17 @@ private static final long serialVersionUID = 1L;
 			}
 			
 		});
+
 		confirmBtn.addActionListener(this);
+		
 		return totalPanel;
 	}
 	
+	/**
+	 * This panel will retrieve all panel in cartList panel to get the required information
+	 */
 	private void setPaymentListPanel() {
+		
 		Component[] components = cartListPanel.getComponents();
 		for(int count = 0; count < cartIndex;count++) {
 			
@@ -654,14 +737,13 @@ private static final long serialVersionUID = 1L;
 			panel.setOpaque(false);
 
 			JPanel newPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-			//newPanel.setOpaque(false);
 			newPanel.setBackground(Color.white);
 
-			JLabel noLabel = new JLabel(Integer.toString(count + 1));
-			
+			JLabel noLabel = new JLabel(Integer.toString(count + 1));	
+
 			JLabel productLabel = (JLabel)panel.getComponent(3);
 			JLabel newProductLabel = new JLabel(productLabel.getText());
-			
+						
 			JLabel productImage = (JLabel)panel.getComponent(5);
 			JLabel newProductImage = new JLabel();
 			newProductImage.setIcon(productImage.getIcon());
@@ -686,6 +768,7 @@ private static final long serialVersionUID = 1L;
 			
 			newPanel.setBorder(BorderFactory.createTitledBorder(" "));
 			
+			//growing paymentList layout
 			if(cartIndex >= 3) {
 				GridLayout grid = new GridLayout(count + 1,1);
 				paymentListPanel.setLayout(grid);
@@ -693,17 +776,26 @@ private static final long serialVersionUID = 1L;
 			paymentListPanel.add(newPanel);
 		}
 	}
-
+	
+	/**
+	 * This method will initialize the welcomePanel
+	 * @param font
+	 * @return
+	 */
 	private JPanel getWelcomePanel(Font font)
 	{
 		JPanel welcomePanel = new JPanel(new BorderLayout());
-		JLabel textLabel = new JLabel("Welcome To Mc Daniel!");
 		
-
-		//Set colour
+		// Style the panel color
 		welcomePanel.setBackground(new Color(255, 228, 196));
 		
-		//Insert imageIcon
+		// Panel components
+		JLabel textLabel = new JLabel("Welcome To Mc Daniel!");
+		JButton comfirmButton=new JButton("Next");
+		JRadioButton eatIn = new JRadioButton("Eat In");
+		JRadioButton takeAway = new JRadioButton("Take Away");
+
+		// Insert imageIcon
 		ImageIcon logoIcon = null;
 		try {
 			Image logo = ImageIO.read(new File("src/image/McDonaldLogo.png"));
@@ -714,43 +806,36 @@ private static final long serialVersionUID = 1L;
 	
 		JLabel logoLabel = new JLabel(logoIcon);
 		
-		JRadioButton eatIn = new JRadioButton("Eat In");
-		JRadioButton takeAway = new JRadioButton("Take Away");
+		// Style the component
 		eatIn.setOpaque(false);
 		takeAway.setOpaque(false);
 		eatIn.setActionCommand("Eat In");
 		takeAway.setActionCommand("Take Away");
-		
-		ButtonGroup selection = new ButtonGroup();
-		selection.add(eatIn);
-		selection.add(takeAway);
-		
-		//Add button
-		JButton comfirmButton=new JButton("Next");
-		
-		//Set font
 		textLabel.setFont(font);
 		eatIn.setFont(font);
 		takeAway.setFont(font);
 		comfirmButton.setFont(font);
 		
-		//Add Component into gridLayout
+		// Group the radio button and only allow customer to choose one order mode
+		ButtonGroup selection = new ButtonGroup();
+		selection.add(eatIn);
+		selection.add(takeAway);		
+		
+		// Add Component into gridLayout
 		JPanel panel = new JPanel(new GridLayout(3,1));
 		panel.setOpaque(false);
-		
-		
-		//open first panel to put icon
+				
+		// Open first panel to put icon
 		JPanel innerPanel = new JPanel();
 		innerPanel.setOpaque(false);
-		//innerPanel.add(imageLabel);
 		innerPanel.add(logoLabel);
 		
-		//open inner panel to put text 
+		// Open inner panel to put text 
 		JPanel innerPanel2 = new JPanel();	
 		innerPanel2.setOpaque(false);
 		innerPanel2.add(textLabel);
 
-		//open second inner panel to put 2 JRadio button
+		// Open second inner panel to put 2 JRadio button
 		JPanel innerPanel3 = new JPanel(new GridLayout(2,1));
 		innerPanel3.setOpaque(false);
 		
@@ -775,16 +860,16 @@ private static final long serialVersionUID = 1L;
 		panel2.add(panel);
 		panel2.setBackground(new Color(255, 228, 196));
 		
+		// This panel is used for decoration to provide empty space above the icon
 		JPanel emptyPanel = new JPanel();
 		emptyPanel.setOpaque(false);
 		emptyPanel.add(Box.createRigidArea(new Dimension(0,100)));
 		
-		//add into panel
+		// Add into panel
 		welcomePanel.add(BorderLayout.NORTH,emptyPanel);
 		welcomePanel.add(BorderLayout.CENTER,panel2);
 
-		
-		//add action listener to button
+		// Add action listener to button
 		comfirmButton.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
@@ -798,6 +883,9 @@ private static final long serialVersionUID = 1L;
 		return welcomePanel;
 	}
 	
+	/**
+	 * This method will get all information in paymentListPanel and store in an object
+	 */
 	private void getOrderedItem() {
 		
 		Component[] component = paymentListPanel.getComponents();
@@ -832,9 +920,11 @@ private static final long serialVersionUID = 1L;
 		orderTransaction.setAmountCharged(totalPrice);
 		 
 		this.orderTransaction = orderTransaction;
-		
 	}
 	
+	/**
+	 * This method will refresh index of the cart list after product remove from cart list
+	 */
 	private void refreshCartIndex() {
 		
 		for(int currentPanel = 0;currentPanel < cartIndex; currentPanel++) {
@@ -846,13 +936,15 @@ private static final long serialVersionUID = 1L;
 		}
 	}
 	
+	/**
+	 * This method load four panel and add into tabbedPane
+	 */
 	private void loadComponent()
 	{
+		tabbedPanel = new JTabbedPane();
 
 		// Get font
 		Font font = this.getFontStyle();
-
-		tabbedPanel = new JTabbedPane();
 		
 		//Welcome tab
 		tabbedPanel.addTab("Welcome", getWelcomePanel(font));
@@ -862,18 +954,18 @@ private static final long serialVersionUID = 1L;
 
 		// Cart tab
 		tabbedPanel.addTab("Cart List", getCartPanel(font));
-		//Payment tab
+		
+		// Payment tab
 		tabbedPanel.addTab("Payment", getPaymentPanel(font));
+
 		tabbedPanel.setEnabledAt(1, false);
 		tabbedPanel.setEnabledAt(2, false);
 		tabbedPanel.setEnabledAt(3, false);
 		
 		add(tabbedPanel);
 		
-
-;	}
+	}
 	
-
 	// Define a generic font style
 	private Font getFontStyle() {
 		
@@ -883,9 +975,14 @@ private static final long serialVersionUID = 1L;
 		
 	}
 
-	public void resetMenuButton() {
+	/**
+	 * This method will enable all addCartBtn in menuList again after customer complete an order
+	 */
+	private void resetMenuButton() {
+		
 		//get all panel from menu panel
 		Component[] components = menu.getComponents();
+		
 		//retrieve inner panel one by one until the buttonPanel
 		for(Component component : components) {
 			JPanel product = (JPanel)component;
@@ -893,8 +990,13 @@ private static final long serialVersionUID = 1L;
 			JButton addCartBtn = (JButton)cartPanel.getComponent(2);
 			addCartBtn.setEnabled(true);
 		}
+		
 	}
 	
+	/**
+	 * This method will reset all needed attribute 
+	 * Ready to next customer input
+	 */
 	private void resetAllComponent() {
 		tabbedPanel.setSelectedIndex(0);
 		tabbedPanel.setEnabledAt(3, false);
@@ -902,10 +1004,34 @@ private static final long serialVersionUID = 1L;
 		cartListPanel.removeAll();
 		paymentListPanel.removeAll();
 		resetMenuButton();
+		creditCardNo.setText("");
 		cartIndex = 0; 
 		totalPrice = 0;
 	}
 	
+	/**
+	*/
+	private MaskFormatter createFormatter(String symbol) {
+		
+		MaskFormatter formatter = null;
+		
+		try {
+			formatter = new MaskFormatter(symbol);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		
+		return formatter;
+	}
+	
+	/**
+	 * This method is actionListener of confirmBtn
+	 * This method will get all information needed to database and store in object
+	 * Release the thread to proceed request to server
+	 * Freeze the thread before server return a result
+	 * Display succeed message when transaction is completed and reset component
+	 * Display error message when transaction is fail
+	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		

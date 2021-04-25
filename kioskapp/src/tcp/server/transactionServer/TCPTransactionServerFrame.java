@@ -1,5 +1,5 @@
 
-package tcpTransactionServer;
+package tcp.server.transactionServer;
 
 import java.awt.BorderLayout;
 import java.awt.Color;

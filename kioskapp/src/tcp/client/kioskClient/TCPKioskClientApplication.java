@@ -1,4 +1,4 @@
-package tcpKioskClient;
+package tcp.client.kioskClient;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -7,8 +7,21 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 
-import kioskapp.ordertransaction.OrderTransaction;
+import model.kioskapp.ordertransaction.OrderTransaction;
+import tcp.client.kioskClient.KioskFrame;
 
+/**
+ * This is main entry point of kiosk client application
+ * Send required information to order server and receive the result
+ * Corresponding message will display depend the result
+ * Write the success transaction as a receipt into a .txt file
+ * 
+ * Caution: Please open all the server application and kitchen application before using kiosk
+ * Error: Kiosk will freeze after pressing confirm button if any application is not open 
+ * 
+ * @author User
+ *
+ */
 public class TCPKioskClientApplication {
 
 	public static void main(String[] args) throws InterruptedException {

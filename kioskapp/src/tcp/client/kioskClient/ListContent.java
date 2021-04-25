@@ -1,26 +1,29 @@
-package tcpKioskClient;
+package tcp.client.kioskClient;
 
 import java.awt.Image;
-import java.awt.List;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
-import javax.swing.JPanel;
 
 import controller.ItemProductController;
-import kioskapp.itemproduct.ItemProduct;
+import model.kioskapp.itemproduct.ItemProduct;
 
-
+/**
+ * This class will load item product from database and the corresponding images
+ * Separate different class for future implementation
+ * @author User
+ *
+ */
 public class ListContent {
 
 	public ArrayList<ItemProduct> setProductList(){
 
 	ArrayList<ItemProduct> productList= new ArrayList<ItemProduct>();
 	ItemProductController controller = new ItemProductController();
-	productList = controller.getALLProduct();
+	productList = controller.getAllProduct();
 		return productList;
 }
 	
@@ -45,7 +48,6 @@ public class ListContent {
 		try {
 			for(int currentString = 0;currentString < 13;currentString++) {
 				Image image = ImageIO.read(new File(paths[currentString]));
-				Image newImage = image.getScaledInstance(120, 90, Image.SCALE_DEFAULT);
 				ImageIcon icon = new ImageIcon(image);
 				images.add(icon);
 			}

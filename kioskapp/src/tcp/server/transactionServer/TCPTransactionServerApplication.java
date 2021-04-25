@@ -1,4 +1,4 @@
-package tcpTransactionServer;
+package tcp.server.transactionServer;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -6,10 +6,18 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import exception.creditCardException.InvalidCreditCardException;
+import model.kioskapp.ordertransaction.OrderTransaction;
 
-import kioskapp.ordertransaction.OrderTransaction;
-import kioskappException.InvalidCreditCardException;
 
+/**
+ * This is main entry point of transaction server application
+ * Transaction server play a role to validate the credit card number send from order server
+ * Validation of credit card number using Luhn's Algorithm in database
+ * Send result back to order server
+ * @author User
+ *
+ */
 public class TCPTransactionServerApplication {
 
 	@SuppressWarnings("resource")
@@ -47,7 +55,7 @@ public class TCPTransactionServerApplication {
 				orderTransaction.setLast4Digits(Integer.parseInt
 						(creditCardNo.substring(creditCardNo.length() - 4)));
 				
-				
+			
 				//open an outputStream to send back transaction detail to order server
 				ObjectOutputStream outputStream = new ObjectOutputStream(clientSocket.getOutputStream());
 				outputStream.writeObject(orderTransaction);

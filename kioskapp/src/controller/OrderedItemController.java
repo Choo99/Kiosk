@@ -5,7 +5,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import kioskapp.order.Order;
+import model.kioskapp.order.Order;
+
 
 public class OrderedItemController {
 

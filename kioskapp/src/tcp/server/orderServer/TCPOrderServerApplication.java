@@ -1,22 +1,32 @@
-package tcpOrderServer;
+package tcp.server.orderServer;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import controller.ItemProductController;
 import controller.OrderController;
 import controller.OrderTransactionController;
 import controller.OrderedItemController;
-import kioskapp.ordereditem.OrderedItem;
-import kioskapp.ordertransaction.OrderTransaction;
-import tcpKioskClient.KioskFrame;
+import model.kioskapp.orderedItem.OrderedItem;
+import model.kioskapp.ordertransaction.OrderTransaction;
 
+
+/**
+ * This is main entry point of order server application
+ * Order server receive orderTransaction from client side and send to transaction server
+ * Receive orderTransaction from transaction server which included validation result
+ * Insert details into database and send to kitchen client and kiosk if pass
+ * Do nothing and pass orderTransaction to client if vice versa
+ * @author User
+ *
+ */
 public class TCPOrderServerApplication {
 
 	/**
@@ -37,13 +47,20 @@ public class TCPOrderServerApplication {
 	
 	TCPOrderServerFrame frame = new TCPOrderServerFrame();
 	frame.setVisible(true);
-
+	
 	int referenceNumber = 0;
+
+	LocalTime midNight = LocalTime.parse("00:00:00",DateTimeFormatter.ISO_TIME);
 
 	serverSocket = new ServerSocket(portNo);
 	ServerSocket kitchenServer = new ServerSocket(kitchenPort);
 	
 	while(true) {
+		
+		//Reset reference number every midnight 
+		if(LocalTime.now().compareTo(midNight) == 0) {
+			referenceNumber = 0;
+		}
 		//accept client request
 		Socket clientSocket = serverSocket.accept();
 		
@@ -97,21 +114,6 @@ public class TCPOrderServerApplication {
 			frame.updateRequestStatus("Transaction ID: " + orderTransaction.getOrderTransactionId());
 			frame.updateRequestStatus("Total amount: " + orderTransaction.getAmountCharged());
 			frame.updateRequestStatus("Transaction Date: " + orderTransaction.getTransactioDate());
-			
-
-			Socket kitchenSocket = kitchenServer.accept();	
-			
-			frame.updateRequestStatus("Send order information to kitchen");
-			frame.updateRequestStatus("Order reference number: " + orderTransaction.getOrder().getOrderReferenceNumber());
-			frame.updateRequestStatus("Total item quantity: "+ orderTransaction.getOrder().getOrderedItems().size());
-			frame.updateRequestStatus("Eat mode: " + orderTransaction.getOrderMode());
-			ObjectOutputStream kitchenOutputStream = new ObjectOutputStream(kitchenSocket.getOutputStream());
-			kitchenOutputStream.writeObject(orderTransaction);
-				
-			frame.updateRequestStatus("\n > Request Done");
-			
-			kitchenOutputStream.close();
-			kitchenSocket.close();
 			}
 
 		//open an outputStream to send transaction details to client side
@@ -121,6 +123,25 @@ public class TCPOrderServerApplication {
 		outputStream.writeObject(orderTransaction);
 		outputStream.flush();
 			
+		if(orderTransaction.isTransactionStatus()) {
+			//accept connection from kitchen application
+			Socket kitchenSocket = kitchenServer.accept();	
+			
+			frame.updateRequestStatus("Send order information to kitchen");
+			frame.updateRequestStatus("Order reference number: " + orderTransaction.getOrder().getOrderReferenceNumber());
+			frame.updateRequestStatus("Total item quantity: "+ orderTransaction.getOrder().getOrderedItems().size());
+			frame.updateRequestStatus("Eat mode: " + orderTransaction.getOrderMode());
+			
+			//send orderTransaction to kitchen server
+			ObjectOutputStream kitchenOutputStream = new ObjectOutputStream(kitchenSocket.getOutputStream());
+			kitchenOutputStream.writeObject(orderTransaction);
+				
+			frame.updateRequestStatus("\n > Request Done");
+			
+			kitchenOutputStream.close();
+			kitchenSocket.close();
+		}
+		
 		//close all object
 		clientSocket.close();
 		transactionSocket.close();

@@ -1,4 +1,4 @@
-package tcpOrderServer;
+package tcp.server.orderServer;
 
 import java.awt.BorderLayout;
 import java.awt.Color;

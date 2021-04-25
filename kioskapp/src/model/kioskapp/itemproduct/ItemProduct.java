@@ -1,4 +1,4 @@
-package kioskapp.itemproduct;
+package model.kioskapp.itemproduct;
 
 import java.io.Serializable;
 

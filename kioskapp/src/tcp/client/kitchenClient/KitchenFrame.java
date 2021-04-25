@@ -1,24 +1,16 @@
 
-package tcpKitchenClient;
+package tcp.client.kitchenClient;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.GridLayout;
-import java.awt.Image;
-import java.awt.Panel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
-
-import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -27,13 +19,14 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.border.Border;
 
-import kioskapp.ordereditem.OrderedItem;
-import kioskapp.ordertransaction.OrderTransaction;
+import model.kioskapp.orderedItem.OrderedItem;
+import model.kioskapp.ordertransaction.OrderTransaction;
+
 
 /**
  * This class represents the front end of the server side application.
@@ -56,6 +49,7 @@ public class KitchenFrame extends JFrame {
 	private JPanel orderPanel;
 	private int orderIndex = 0;
 	private JPanel botPanel;
+	JLabel connectStatus;
 
 	/**
 	 * The constructor organize the GUI component for the window.
@@ -69,6 +63,8 @@ public class KitchenFrame extends JFrame {
 		
 		orderPanel = new JPanel();
 		orderPanel.setBackground(new Color(240, 255, 240));
+		
+		connectStatus = new JLabel("-");
 		
 		// Must close on X
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -101,18 +97,44 @@ public class KitchenFrame extends JFrame {
 		JPanel panel = new JPanel();
 		panel.setBackground(new Color(240, 255, 240));
 	
-		JLabel title = new JLabel ("Kitchen");
+		JLabel title = new JLabel ("Kitchen Client: ");
 		
 		// Style the components
 		title.setFont(font);
-		//title.setOpaque(false);
+		connectStatus.setFont(font);
 
 		// Organize component into the panel
 		panel.add(title);
+		panel.add(connectStatus);
 		
 		return panel;
 	}
 	
+	/**
+	 * This method will pop out message for error
+	 * @param message
+	 */
+	public void displayMessage(String message) {
+		JOptionPane.showMessageDialog(this, message,"Error", JOptionPane.ERROR_MESSAGE);
+	}
+	
+	/**
+	 * This method will set the connection status of kitchen application
+	 * @param status
+	 */
+	public void setConnectStatus(boolean status) {
+		if(status) {
+			connectStatus.setText("Connected");
+		}
+		else {
+			connectStatus.setText("No connection");
+		}
+	}
+	
+	/**
+	 * This method will add order details into orderPanel
+	 * @param orderTransaction
+	 */
 	public void setOrderPanel(OrderTransaction orderTransaction) {
 		
 		if(orderIndex == 0) {
@@ -170,6 +192,10 @@ public class KitchenFrame extends JFrame {
 		orderIndex++;
 		KitchenFrame frame = this;
 		
+		/**
+		 * finishBtn will remove entire panel from orderPanel
+		 * Default message will display when there is no more order in the list
+		 */
 		finishBtn.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
@@ -198,6 +224,11 @@ public class KitchenFrame extends JFrame {
 		});
 	}
 	
+	/**
+	 * This method will initialize the orderPanel with default message
+	 * @param font
+	 * @return JPanel orderPanel
+	 */
 	private JPanel getOrderPanel(Font font) {
 
 		JLabel statusLabel = new JLabel("Yes! No order for now");
@@ -208,6 +239,10 @@ public class KitchenFrame extends JFrame {
 		return orderPanel;
 	}
 	
+	/**
+	 * This method will initialize the gif in botPanel
+	 * @return'JPanel botPanel
+	 */
 	private JPanel getBotPanel() {
 
 		botPanel = new JPanel();
@@ -224,6 +259,10 @@ public class KitchenFrame extends JFrame {
 		return botPanel;
 	}
 	
+	/**
+	 * This method will load gif as icon
+	 * @return Icon icon
+	 */
 	private Icon getImage() {
 		Icon icon = null;
 		try {
@@ -269,12 +308,4 @@ public class KitchenFrame extends JFrame {
 		
 		return font;
 	}
-	
-
-	
-	
-	
-	
-	
-	
 }

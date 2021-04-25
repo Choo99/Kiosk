@@ -1,4 +1,4 @@
-package tcpTransactionServer;
+package tcp.server.transactionServer;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -6,7 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import controller.AuthorizationdbConn;
-import kioskappException.InvalidCreditCardException;
+import exception.creditCardException.InvalidCreditCardException;
 
 public class CreditCardAuthorization {
 

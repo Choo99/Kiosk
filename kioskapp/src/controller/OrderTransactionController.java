@@ -2,12 +2,12 @@ package controller;
 
 
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import kioskapp.ordertransaction.OrderTransaction;
+import model.kioskapp.ordertransaction.OrderTransaction;
+
 
 public class OrderTransactionController {
 
@@ -19,6 +19,7 @@ public class OrderTransactionController {
 
 	
 	// To insert transaction detail into database and get the auto generate transaction id
+		@SuppressWarnings("resource")
 		public OrderTransaction insertTransaction(OrderTransaction orderTransaction){
 		
 		Connection conn = null;

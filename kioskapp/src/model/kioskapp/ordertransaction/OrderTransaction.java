@@ -1,9 +1,10 @@
-package kioskapp.ordertransaction;
+package model.kioskapp.ordertransaction;
 
 import java.io.Serializable;
 import java.sql.Date;
 
-import kioskapp.order.Order;
+import model.kioskapp.order.Order;
+
 
 /**
  * 

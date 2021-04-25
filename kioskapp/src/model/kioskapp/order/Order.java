@@ -1,9 +1,10 @@
-package kioskapp.order;
+package model.kioskapp.order;
 
 import java.io.Serializable;
 import java.util.List;
 
-import kioskapp.ordereditem.OrderedItem;
+import model.kioskapp.orderedItem.OrderedItem;
+
 
 /**
  * This class represent order made by a customer
